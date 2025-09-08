@@ -72,6 +72,12 @@ export function FileUploader({
       const uploadData = await uploadResponse.json() as { uploadURL: string };
       const uploadURL = uploadData.uploadURL;
 
+      // 🔍 DEBUG LOG - Frontend upload flow
+      console.log("=== FRONTEND UPLOAD DEBUG ===");
+      console.log("Upload response data:", uploadData);
+      console.log("uploadURL from response:", uploadURL);
+      console.log("==============================");
+
       // 2. Subir archivo directamente a Google Cloud Storage
       const fileUploadResponse = await fetch(uploadURL, {
         method: "PUT",
@@ -81,6 +87,8 @@ export function FileUploader({
         },
       });
 
+      console.log("File upload response status:", fileUploadResponse.status);
+
       if (!fileUploadResponse.ok) {
         throw new Error(`Upload failed: ${fileUploadResponse.status}`);
       }
@@ -88,6 +96,9 @@ export function FileUploader({
       // 3. Extraer el ID del objeto de la URL
       const objectId = extractObjectIdFromURL(uploadURL);
       const localImageUrl = `/uploads/uploads/${objectId}`;
+
+      console.log("Extracted objectId:", objectId);
+      console.log("Constructed localImageUrl:", localImageUrl);
 
       // 4. Notificar al componente padre
       onUploadComplete(localImageUrl);
@@ -118,11 +129,24 @@ export function FileUploader({
   const extractObjectIdFromURL = (uploadURL: string): string => {
     try {
       const url = new URL(uploadURL);
+      
+      // 🔍 DEBUG LOG - URL extraction
+      console.log("=== EXTRACT ID DEBUG ===");
+      console.log("Full uploadURL:", uploadURL);
+      console.log("URL pathname:", url.pathname);
+      console.log("Path parts:", url.pathname.split('/'));
+      
       const pathParts = url.pathname.split('/');
       // El path es algo como: /bucket-name/folder/uploads/object-id
       // Tomamos la última parte que es el ID del objeto
-      return pathParts[pathParts.length - 1];
-    } catch {
+      const objectId = pathParts[pathParts.length - 1];
+      
+      console.log("Extracted objectId:", objectId);
+      console.log("========================");
+      
+      return objectId;
+    } catch (error) {
+      console.error('Error extracting object ID from URL:', uploadURL, error);
       return 'unknown-' + Date.now();
     }
   };

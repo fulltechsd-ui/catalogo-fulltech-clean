@@ -422,6 +422,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { uploadUrl, objectPath } =
         await objectStorageService.getObjectEntityUploadURL();
 
+      // 🔍 DEBUG LOG - Upload URL generation
+      console.log("=== UPLOAD URL DEBUG ===");
+      console.log("Generated uploadUrl:", uploadUrl);
+      console.log("Generated objectPath:", objectPath);
+      console.log("========================");
+
       // Ahora los nombres aquí coinciden con los de arriba
       res.json({ uploadUrl, objectPath });
     } catch (error) {
@@ -433,6 +439,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded images
   app.get("/uploads/:objectPath(*)", async (req, res) => {
     try {
+      // 🔍 DEBUG LOG - File serving
+      console.log("=== SERVE FILE DEBUG ===");
+      console.log("Requested objectPath:", req.params.objectPath);
+      console.log("Full path being searched:", `/objects/${req.params.objectPath}`);
+      console.log("=========================");
+
       const objectFile = await objectStorageService.getObjectEntityFile(
         `/objects/${req.params.objectPath}`,
       );

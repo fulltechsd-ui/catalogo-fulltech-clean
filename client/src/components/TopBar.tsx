@@ -200,7 +200,7 @@ export function TopBar() {
 
       {/* Dropdown Menu */}
       <div 
-        className={`absolute top-20 right-4 w-64 bg-white border border-border rounded-xl shadow-lg p-4 z-50 transition-all duration-200 ${
+        className={`absolute top-20 right-4 w-64 bg-white border border rounded-xl shadow-lg p-4 z-50 transition-all duration-200 ${
           isMenuOpen 
             ? 'opacity-100 visible translate-y-0' 
             : 'opacity-0 invisible -translate-y-2'
@@ -253,7 +253,7 @@ export function TopBar() {
               <span>Carrito</span>
             </button>
             
-            <hr className="my-2 border-border" />
+            <hr className="my-2 border" />
             
             {/* Páginas principales dinámicas */}
             {groupedPages.main && groupedPages.main.map((page) => (
@@ -295,7 +295,7 @@ export function TopBar() {
               <span>Contacto</span>
             </Link>
             
-            <hr className="my-2 border-border" />
+            <hr className="my-2 border" />
             
             <button 
               className="w-full flex items-center gap-3 p-3 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
@@ -351,7 +351,7 @@ export function TopBar() {
               <span>Contacto</span>
             </Link>
             
-            <hr className="my-2 border-border" />
+            <hr className="my-2 border" />
             
             {/* Login para usuarios no autenticados */}
             <button 

@@ -17,7 +17,7 @@ export default function Contact() {
                 <span>Regresar al catálogo</span>
               </Link>
             </div>
-            <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+            <div className="bg-card rounded-xl shadow-sm border border p-6">
               <h1 className="text-2xl font-bold text-primary mb-6">Contacto</h1>
               
               <div className="prose prose-sm max-w-none text-card-foreground">
@@ -99,7 +99,7 @@ export default function Contact() {
 
                 <h2 className="text-lg font-semibold text-primary mt-8 mb-4">Departamentos Especializados</h2>
                 <div className="space-y-4 mb-6">
-                  <div className="border border-border rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <i className="fas fa-shopping-cart text-primary"></i>
                       <h3 className="font-semibold">Ventas</h3>
@@ -110,7 +110,7 @@ export default function Contact() {
                     <p className="text-sm">📧 ventas@fulltech.com</p>
                   </div>
 
-                  <div className="border border-border rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <i className="fas fa-tools text-primary"></i>
                       <h3 className="font-semibold">Soporte Técnico</h3>
@@ -121,7 +121,7 @@ export default function Contact() {
                     <p className="text-sm">📧 soporte@fulltech.com</p>
                   </div>
 
-                  <div className="border border-border rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <i className="fas fa-undo text-primary"></i>
                       <h3 className="font-semibold">Devoluciones</h3>
@@ -132,7 +132,7 @@ export default function Contact() {
                     <p className="text-sm">📧 devoluciones@fulltech.com</p>
                   </div>
 
-                  <div className="border border-border rounded-lg p-4">
+                  <div className="border border rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-2">
                       <i className="fas fa-gift text-primary"></i>
                       <h3 className="font-semibold">Referidos y Rifas</h3>

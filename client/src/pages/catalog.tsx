@@ -372,7 +372,7 @@ export default function Catalog() {
           </button>
 
           {/* Expandable Footer */}
-          <footer className={`fixed bottom-0 left-0 w-full bg-card border-t border-border z-40 transition-all duration-500 ${
+          <footer className={`fixed bottom-0 left-0 w-full bg-card border-t border z-40 transition-all duration-500 ${
             isFooterExpanded ? 'h-96' : 'h-14'
           }`}>
             {/* Expanded Content */}

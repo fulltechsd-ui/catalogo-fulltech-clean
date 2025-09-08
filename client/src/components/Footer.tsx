@@ -9,7 +9,7 @@ export function Footer() {
   useConfigLoader();
 
   return (
-    <footer className="bg-card border-t border-border">
+    <footer className="bg-card border-t border">
       <div className="max-w-7xl mx-auto px-4">
         <div className="py-3">
           {/* En móvil: Una sola línea compacta y delicada */}
@@ -168,7 +168,7 @@ export function Footer() {
 
       {/* Footer expandido - solo visible cuando se hace click */}
       {isExpanded && (
-        <div className="border-t border-border bg-card max-h-96 overflow-y-auto">
+        <div className="border-t border bg-card max-h-96 overflow-y-auto">
           <div className="max-w-7xl mx-auto px-4 py-8">
             {/* 1. PROGRAMA DE REFERIDOS - LO MÁS IMPORTANTE AL FRENTE */}
             <div className="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-950 dark:to-orange-900 rounded-xl p-6 border border-yellow-200 dark:border-yellow-800 shadow-lg hover:shadow-xl transition-all mb-8">
@@ -184,7 +184,7 @@ export function Footer() {
             </div>
 
             {/* 2. REDES SOCIALES - IMPORTANTE PARA MARKETING */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-border shadow-lg hover:shadow-xl transition-all mb-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border shadow-lg hover:shadow-xl transition-all mb-8">
               <h3 className="text-xl font-bold text-center text-foreground mb-6">Síguenos en Redes Sociales</h3>
               <div className="flex justify-center items-center gap-6">
                 {getConfigValue('social_facebook') && (
@@ -223,7 +223,7 @@ export function Footer() {
             {/* 3. COMPRAS Y SERVICIOS - IMPORTANTE PARA USUARIOS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Compras */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-border shadow-lg hover:shadow-xl transition-all">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border shadow-lg hover:shadow-xl transition-all">
                 <h3 className="font-semibold text-foreground mb-4 text-center">🛒 Compras</h3>
                 <ul className="space-y-2 text-sm">
                   <li>
@@ -250,7 +250,7 @@ export function Footer() {
               </div>
 
               {/* Servicios */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-border shadow-lg hover:shadow-xl transition-all">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border shadow-lg hover:shadow-xl transition-all">
                 <h3 className="font-semibold text-foreground mb-4 text-center">🔧 Servicios</h3>
                 <ul className="space-y-2 text-sm">
                   <li>
@@ -285,7 +285,7 @@ export function Footer() {
             {/* 4. AL FINAL - INFORMACIÓN LEGAL Y CONTACTO (LADO A LADO) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Legal e Información */}
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border-border">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border">
                 <h3 className="font-semibold text-foreground mb-4 text-center">📋 Información Legal</h3>
                 <ul className="space-y-2 text-sm">
                   <li>
@@ -312,7 +312,7 @@ export function Footer() {
               </div>
 
               {/* Contacto */}
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border-border">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 border border">
                 <h3 className="font-semibold text-foreground mb-4 text-center">📞 Contacto</h3>
                 <div className="space-y-2 text-sm text-muted-foreground text-center">
                   {getConfigValue('contact_phone') && (
@@ -349,8 +349,8 @@ export function Footer() {
             </div>
 
             {/* 5. MAPA DE UBICACIÓN */}
-            <div className="border-t border-border mt-8 pt-8">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-border shadow-lg hover:shadow-xl transition-all mb-8">
+            <div className="border-t border mt-8 pt-8">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border shadow-lg hover:shadow-xl transition-all mb-8">
                 <h3 className="text-xl font-bold text-center text-foreground mb-6 flex items-center justify-center gap-2">
                   <i className="fas fa-map-marker-alt text-primary text-xl"></i>
                   Nuestra Ubicación
@@ -399,12 +399,12 @@ export function Footer() {
             </div>
 
             {/* 6. DIRECTORIO COMPLETO DE PÁGINAS Y SERVICIOS */}
-            <div className="border-t border-border pt-8">
+            <div className="border-t border pt-8">
               <h3 className="text-xl font-bold text-center text-foreground mb-8">Directorio Completo</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 {/* Catálogo de Productos */}
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-border">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border">
                   <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                     <i className="fas fa-mobile-alt text-primary"></i>
                     Catálogo
@@ -419,7 +419,7 @@ export function Footer() {
                 </div>
 
                 {/* Servicios al Cliente */}
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-border">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border">
                   <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                     <i className="fas fa-headset text-primary"></i>
                     Servicios
@@ -434,7 +434,7 @@ export function Footer() {
                 </div>
 
                 {/* Información Empresarial */}
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-border">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border">
                   <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                     <i className="fas fa-building text-primary"></i>
                     Empresa
@@ -449,7 +449,7 @@ export function Footer() {
                 </div>
 
                 {/* Información Legal */}
-                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-border">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border">
                   <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                     <i className="fas fa-gavel text-primary"></i>
                     Legal
@@ -466,7 +466,7 @@ export function Footer() {
             </div>
 
             {/* Bottom section */}
-            <div className="border-t border-border mt-8 pt-6">
+            <div className="border-t border mt-8 pt-6">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="text-sm text-muted-foreground">
                   {getConfigValue('footer_copyright', `© ${new Date().getFullYear()} FULLTECH. Todos los derechos reservados.`)}

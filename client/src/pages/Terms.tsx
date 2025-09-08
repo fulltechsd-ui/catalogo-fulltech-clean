@@ -17,7 +17,7 @@ export default function Terms() {
                 <span>Regresar al catálogo</span>
               </Link>
             </div>
-            <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+            <div className="bg-card rounded-xl shadow-sm border border p-6">
               <h1 className="text-2xl font-bold text-primary mb-6">Términos y Condiciones</h1>
               
               <div className="prose prose-sm max-w-none text-card-foreground">

@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function AdminRaffle() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: participants = [], isLoading } = useQuery({
+  const { data: participants = [], isLoading } = useQuery<RaffleParticipant[]>({
     queryKey: ["/api/admin/raffle-participants"],
     retry: false,
   });

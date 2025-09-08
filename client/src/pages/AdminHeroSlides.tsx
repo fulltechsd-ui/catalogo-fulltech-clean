@@ -13,7 +13,7 @@ export default function AdminHeroSlides() {
   const [showForm, setShowForm] = useState(false);
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
 
-  const { data: slides = [], isLoading } = useQuery({
+  const { data: slides = [], isLoading } = useQuery<HeroSlide[]>({
     queryKey: ["/api/admin/hero-slides"],
     retry: false,
   });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { type Customer, type CustomerActivity, type CustomerPurchase, type Referral, type MonthlyRaffle } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -11,31 +12,31 @@ export function CustomerDashboard() {
   const [copied, setCopied] = useState(false);
 
   // Obtener datos del cliente autenticado
-  const { data: customer, isLoading: customerLoading } = useQuery({
+  const { data: customer, isLoading: customerLoading } = useQuery<Customer>({
     queryKey: ["/api/auth/me"],
     retry: false,
   });
 
   // Obtener actividades del cliente
-  const { data: activities = [] } = useQuery({
+  const { data: activities = [] } = useQuery<CustomerActivity[]>({
     queryKey: ["/api/customer/activities"],
     enabled: !!customer,
   });
 
   // Obtener compras del cliente
-  const { data: purchases = [] } = useQuery({
+  const { data: purchases = [] } = useQuery<CustomerPurchase[]>({
     queryKey: ["/api/customer/purchases"],
     enabled: !!customer,
   });
 
   // Obtener referidos del cliente
-  const { data: referrals = [] } = useQuery({
+  const { data: referrals = [] } = useQuery<Referral[]>({
     queryKey: ["/api/customer/referrals"],
     enabled: !!customer,
   });
 
   // Obtener rifa actual
-  const { data: currentRaffle } = useQuery({
+  const { data: currentRaffle } = useQuery<MonthlyRaffle>({
     queryKey: ["/api/raffle/current"],
   });
 

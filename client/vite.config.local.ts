@@ -22,6 +22,11 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5000,
     strictPort: true,
+    allowedHosts: [
+      "1eb034fb-2ce9-4a2e-b5fe-258760543961-00-icpw8rj0ojbf.worf.replit.dev",
+      "localhost",
+      "127.0.0.1"
+    ],
     fs: {
       strict: true,
       deny: ["**/.*"],

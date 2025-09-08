@@ -422,11 +422,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { uploadUrl, objectPath } =
         await objectStorageService.getObjectEntityUploadURL();
 
-      // 🔍 DEBUG LOG - Upload URL generation
-      console.log("=== UPLOAD URL DEBUG ===");
-      console.log("Generated uploadUrl:", uploadUrl);
-      console.log("Generated objectPath:", objectPath);
-      console.log("========================");
 
       // Ahora los nombres aquí coinciden con los de arriba
       res.json({ uploadUrl, objectPath });
@@ -439,11 +434,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded images
   app.get("/uploads/:objectPath(*)", async (req, res) => {
     try {
-      // 🔍 DEBUG LOG - File serving
-      console.log("=== SERVE FILE DEBUG ===");
-      console.log("Requested objectPath:", req.params.objectPath);
-      console.log("Direct path being searched:", req.params.objectPath);
-      console.log("=========================");
 
       await objectStorageService.downloadObject(req.params.objectPath, res);
     } catch (error) {

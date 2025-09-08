@@ -73,11 +73,6 @@ export function FileUploader({
       const uploadURL = uploadData.uploadUrl;
       const objectPath = uploadData.objectPath;
 
-      // 🔍 DEBUG LOG - Frontend upload flow
-      console.log("=== FRONTEND UPLOAD DEBUG ===");
-      console.log("Upload response data:", uploadData);
-      console.log("uploadURL from response:", uploadURL);
-      console.log("==============================");
 
       // 2. Subir archivo directamente a Google Cloud Storage
       const fileUploadResponse = await fetch(uploadURL, {
@@ -88,7 +83,6 @@ export function FileUploader({
         },
       });
 
-      console.log("File upload response status:", fileUploadResponse.status);
 
       if (!fileUploadResponse.ok) {
         throw new Error(`Upload failed: ${fileUploadResponse.status}`);
@@ -97,8 +91,6 @@ export function FileUploader({
       // 3. Usar el objectPath correcto del backend
       const localImageUrl = `/uploads/${objectPath}`;
 
-      console.log("Using objectPath from backend:", objectPath);
-      console.log("Constructed localImageUrl:", localImageUrl);
 
       // 4. Notificar al componente padre
       onUploadComplete(localImageUrl);
@@ -130,19 +122,8 @@ export function FileUploader({
     try {
       const url = new URL(uploadURL);
       
-      // 🔍 DEBUG LOG - URL extraction
-      console.log("=== EXTRACT ID DEBUG ===");
-      console.log("Full uploadURL:", uploadURL);
-      console.log("URL pathname:", url.pathname);
-      console.log("Path parts:", url.pathname.split('/'));
-      
       const pathParts = url.pathname.split('/');
-      // El path es algo como: /bucket-name/folder/uploads/object-id
-      // Tomamos la última parte que es el ID del objeto
       const objectId = pathParts[pathParts.length - 1];
-      
-      console.log("Extracted objectId:", objectId);
-      console.log("========================");
       
       return objectId;
     } catch (error) {

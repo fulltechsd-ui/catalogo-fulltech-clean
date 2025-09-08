@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, memo } from 'react';
-import { useCacheManager, ImageOptimizer } from '@/utils/cacheManager';
+import { useCacheManager, ImageOptimizer } from '../utils/cacheManager';
 
 interface OptimizedImageProps {
   src: string;

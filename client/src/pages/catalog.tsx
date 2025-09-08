@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { TopBar } from "../components/TopBar";
 import { OptimizedImage } from "../components/OptimizedImage";
 import { useOptimizedProducts } from "../hooks/useOptimizedProducts";
-import { useCacheManager } from "@/utils/cacheManager";
+import { useCacheManager } from "../utils/cacheManager";
 import { WelcomeMessage } from "../components/WelcomeMessage";
 import { UserActivityTracker } from "../components/UserActivityTracker";
 

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { type RaffleParticipant } from "../../../shared/schema";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { type RaffleParticipant } from "@shared/schema";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { useState } from "react";
 
 export default function AdminRaffle() {

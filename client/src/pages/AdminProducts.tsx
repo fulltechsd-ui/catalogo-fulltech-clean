@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { type Product } from "../../../shared/schema";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Badge } from "./ui/badge";
+import { type Product } from "@shared/schema";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Badge } from "../components/ui/badge";
 import { ProductForm } from "../components/admin/ProductForm";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";

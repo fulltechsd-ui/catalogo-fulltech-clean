@@ -422,7 +422,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { uploadUrl, objectPath } =
         await objectStorageService.getObjectEntityUploadURL();
 
-
       // Ahora los nombres aquí coinciden con los de arriba
       res.json({ uploadUrl, objectPath });
     } catch (error) {
@@ -434,8 +433,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded images
   app.get("/uploads/:objectPath(*)", async (req, res) => {
     try {
-
-      await objectStorageService.downloadObject(req.params.objectPath, res);
+      const objectFile = await objectStorageService.getObjectEntityFile(
+        `/objects/${req.params.objectPath}`,
+      );
+      await objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
       console.error("Error serving uploaded file:", error);
       if (error instanceof ObjectNotFoundError) {
@@ -448,8 +449,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve public assets from object storage
   app.get("/public-images/:filePath(*)", async (req, res) => {
     try {
-      // TODO: Fix public object search - temporarily disabled
-      return res.status(404).json({ error: "Public assets temporarily unavailable" });
+      const file = await objectStorageService.searchPublicObject(
+        req.params.filePath,
+      );
+      if (!file) {
+        return res.status(404).json({ error: "File not found" });
+      }
+      await objectStorageService.downloadObject(file, res);
     } catch (error) {
       console.error("Error serving public image:", error);
       return res.status(500).json({ error: "Error serving image" });

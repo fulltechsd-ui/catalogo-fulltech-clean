@@ -456,6 +456,33 @@ textarea {
     flex-wrap: wrap;
     gap: 0.75rem;
   }
+  
+  /* Footer optimizado para escritorio */
+  footer {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Mejorar espaciado en desktop footer */
+  footer .max-w-7xl {
+    padding: 1.5rem 4rem;
+  }
+  
+  /* Iconos más grandes en footer desktop */
+  footer .hidden.md\\:block i {
+    font-size: 1.125rem;
+  }
+  
+  /* Animaciones suaves para elementos interactivos en footer */
+  footer a, footer button {
+    transition: all 0.2s ease;
+  }
+  
+  footer a:hover, footer button:hover {
+    transform: translateY(-1px);
+  }
 }
 
 /* Optimizaciones específicas para pantallas muy grandes */

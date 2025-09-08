@@ -287,10 +287,10 @@ export default function Catalog() {
             />
           </div>
 
-          <main className="px-4 py-6 pb-20 md:pb-6 space-y-6 max-w-6xl mx-auto">
+          <main className="px-4 py-6 pb-20 md:pb-6 space-y-6 main-container">
             {/* All Products in Featured Style */}
             <section>
-              <div className="mb-4">
+              <div className="mb-4 flex justify-center">
                 <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-2 inline-flex gap-1 shadow-sm border border-gray-200 dark:border-gray-700">
                   <button
                     onClick={() => setShowOnlyOffers(false)}
@@ -319,7 +319,7 @@ export default function Catalog() {
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6 products-grid">
                 {allProducts.map((product) => (
                   <ProductCard 
                     key={product.id} 

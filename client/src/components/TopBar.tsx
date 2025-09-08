@@ -135,7 +135,7 @@ export function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 safe-area-top">
-      <div className="bg-white/10 backdrop-blur-lg border-b border-white/20 shadow-lg px-4 py-3 flex items-center justify-between h-16">
+      <div className="bg-white/10 backdrop-blur-lg border-b border-white/20 shadow-lg px-4 py-3 flex items-center justify-between h-16 md:h-20 md:px-8">
         <button 
           onClick={goHome}
           className="flex items-center gap-3 hover:opacity-90 transition-opacity"
@@ -144,37 +144,37 @@ export function TopBar() {
           <img 
             src={logoUrl} 
             alt={logoAlt} 
-            className="w-10 h-10 object-contain filter drop-shadow-md animate-spin-slow rounded-full"
+            className="w-10 h-10 md:w-12 md:h-12 object-contain filter drop-shadow-md animate-spin-slow rounded-full"
           />
           <div>
-            <h1 className="text-white font-bold text-xl tracking-wider drop-shadow-xl bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent filter brightness-150 contrast-125">{siteName}</h1>
+            <h1 className="text-white font-bold text-xl md:text-2xl tracking-wider drop-shadow-xl bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent filter brightness-150 contrast-125">{siteName}</h1>
             {isAuthenticated && customer && (
-              <p className="text-white/80 text-xs drop-shadow-sm">
+              <p className="text-white/80 text-xs md:text-sm drop-shadow-sm">
                 Hola, {customer.name.split(' ')[0]} 👋
               </p>
             )}
           </div>
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:gap-4">
           {/* Botón Compartir - siempre visible */}
           <button 
             onClick={handleShareClick}
-            className="icon-button bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-colors"
+            className="icon-button bg-white/20 backdrop-blur-sm rounded-full p-2 md:p-3 hover:bg-white/30 transition-colors"
             data-testid="button-share-app"
             title="Compartir App"
           >
-            <i className="text-white fas fa-share-alt text-sm"></i>
+            <i className="text-white fas fa-share-alt text-sm md:text-base"></i>
           </button>
           
           {/* Botón Instalar - solo si no está instalada */}
           {showInstallButton && !isAppInstalled && (
             <button 
               onClick={handleInstallClick}
-              className="icon-button bg-green-500/80 backdrop-blur-sm rounded-full p-2 hover:bg-green-600 transition-colors animate-pulse"
+              className="icon-button bg-green-500/80 backdrop-blur-sm rounded-full p-2 md:p-3 hover:bg-green-600 transition-colors animate-pulse"
               data-testid="button-install-app"
               title="Instalar App"
             >
-              <i className="text-white fas fa-download text-sm"></i>
+              <i className="text-white fas fa-download text-sm md:text-base"></i>
             </button>
           )}
           
@@ -183,24 +183,24 @@ export function TopBar() {
               <img 
                 src={customer.picture} 
                 alt={customer.name}
-                className="w-8 h-8 rounded-full border-2 border-white/30"
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white/30"
               />
             </div>
           )}
           <button 
             id="menu-toggle" 
-            className="icon-button bg-white/20 backdrop-blur-sm rounded-full p-2 hover:bg-white/30 transition-colors"
+            className="icon-button bg-white/20 backdrop-blur-sm rounded-full p-2 md:p-3 hover:bg-white/30 transition-colors"
             onClick={toggleMenu}
             data-testid="button-menu-toggle"
           >
-            <i className="text-white fas fa-bars text-sm"></i>
+            <i className="text-white fas fa-bars text-sm md:text-base"></i>
           </button>
         </div>
       </div>
 
       {/* Dropdown Menu */}
       <div 
-        className={`absolute top-20 right-4 w-64 bg-white border border-border rounded-xl shadow-lg p-4 z-50 transition-all duration-200 ${
+        className={`absolute top-20 md:top-24 right-4 md:right-8 w-64 md:w-80 bg-white border border-border rounded-xl shadow-lg p-4 md:p-6 z-50 transition-all duration-200 ${
           isMenuOpen 
             ? 'opacity-100 visible translate-y-0' 
             : 'opacity-0 invisible -translate-y-2'

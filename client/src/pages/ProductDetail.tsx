@@ -1,164 +1,9 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { TopBar } from "@/components/TopBar";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import type { Product } from "@shared/schema";
-
-// Same product data - in a real app this would come from an API
-const sampleProducts: Product[] = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro",
-    description: "Último modelo con chip A17 Pro",
-    price: 99900,
-    category: "smartphones",
-    images: [
-      "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1556656793-08538906a9f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: true,
-    originalPrice: 119900,
-    rating: 5,
-    reviewCount: 128,
-  },
-  {
-    id: "2",
-    name: "MacBook Pro M3",
-    description: "Chip M3 Pro, 18GB RAM",
-    price: 249900,
-    category: "laptops",
-    images: [
-      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: false,
-    originalPrice: null,
-    rating: 5,
-    reviewCount: 89,
-  },
-  {
-    id: "3",
-    name: "AirPods Pro (2ª gen)",
-    description: "Cancelación activa de ruido",
-    price: 24900,
-    category: "audio",
-    images: [
-      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: true,
-    originalPrice: 29900,
-    rating: 5,
-    reviewCount: 445,
-  },
-  {
-    id: "4",
-    name: "Teclado Mecánico RGB",
-    description: "Switches Cherry MX Blue",
-    price: 8900,
-    category: "gaming",
-    images: [
-      "https://images.unsplash.com/photo-1541140532154-b024d705b90a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1572721546624-05bf65ad7679?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: false,
-    originalPrice: null,
-    rating: 4,
-    reviewCount: 89,
-  },
-  {
-    id: "5",
-    name: "Mouse Gaming Pro",
-    description: "12000 DPI, RGB personalizable",
-    price: 6500,
-    category: "gaming",
-    images: [
-      "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: true,
-    originalPrice: 7900,
-    rating: 5,
-    reviewCount: 234,
-  },
-  {
-    id: "6",
-    name: "Tablet Android 12\"",
-    description: "8GB RAM, 256GB almacenamiento",
-    price: 39900,
-    category: "tablets",
-    images: [
-      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1561154464-82e9adf32764?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: false,
-    originalPrice: null,
-    rating: 4,
-    reviewCount: 56,
-  },
-  {
-    id: "7",
-    name: "Audífonos Inalámbricos",
-    description: "Cancelación de ruido, 30h batería",
-    price: 17900,
-    category: "audio",
-    images: [
-      "https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1484704849700-f032a568e944?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1505236858219-8359eb29e329?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: true,
-    originalPrice: 21900,
-    rating: 5,
-    reviewCount: 445,
-  },
-  {
-    id: "8",
-    name: "Apple Watch Series 9",
-    description: "GPS + Cellular, 45mm",
-    price: 42900,
-    category: "wearables",
-    images: [
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-      "https://images.unsplash.com/photo-1585682738429-c2b20c8e2de5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"
-    ],
-    videos: ["https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"],
-    inStock: true,
-    featured: true,
-    onSale: false,
-    originalPrice: null,
-    rating: 5,
-    reviewCount: 892,
-  },
-];
 
 export default function ProductDetail() {
   const params = useParams();
@@ -166,25 +11,49 @@ export default function ProductDetail() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const product = sampleProducts.find((p) => p.id === params.id);
+  // Fetch real products from API
+  const { data: products = [], isLoading, error } = useQuery<Product[]>({
+    queryKey: ["/api/products"],
+  });
+
+  // Find the specific product by ID
+  const product = products.find((p) => p.id === params.id);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-screen bg-background">
+        <div className="w-full min-h-screen">
+          <div className="w-full min-h-screen">
+            <TopBar />
+            <div className="flex items-center justify-center h-full pt-20">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent mx-auto mb-4"></div>
+                <p className="text-sm font-medium text-foreground">Cargando producto...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
-      <div className="phone-frame">
-        <div className="phone-notch"></div>
-        <div className="phone-screen">
-          <div className="phone-content">
+      <div className="w-full min-h-screen bg-background">
+        <div className="w-full min-h-screen">
+          <div className="w-full min-h-screen">
             <TopBar />
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full pt-20">
               <div className="text-center">
-                <p className="text-4xl mb-4">😕</p>
-                <h3 className="text-lg font-semibold mb-2">Producto no encontrado</h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-4xl md:text-6xl mb-4">😕</p>
+                <h3 className="text-lg md:text-2xl font-semibold mb-2">Producto no encontrado</h3>
+                <p className="text-muted-foreground mb-4 md:text-lg max-w-md">
                   El producto que buscas no existe o fue removido.
                 </p>
                 <button 
                   onClick={() => setLocation("/")}
-                  className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                  className="bg-primary text-primary-foreground px-6 py-2 md:px-8 md:py-3 rounded-lg hover:bg-primary/90 transition-colors text-sm md:text-base"
                   data-testid="button-back-to-catalog"
                 >
                   Volver al catálogo
@@ -249,15 +118,14 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="phone-frame">
-      <div className="phone-notch"></div>
-      <div className="phone-screen">
-        <div className="phone-content">
+    <div className="w-full min-h-screen bg-background">
+      <div className="w-full min-h-screen">
+        <div className="w-full min-h-screen">
           {/* Full screen product image */}
           <div className="relative w-full h-screen">
             {/* Product Image Background */}
             <div className="absolute inset-0" onClick={() => setIsFullscreen(true)}>
-              {product.images[selectedImageIndex] ? (
+              {product.images && product.images.length > 0 && product.images[selectedImageIndex] ? (
                 <img 
                   src={product.images[selectedImageIndex]}
                   alt={product.name}
@@ -265,7 +133,7 @@ export default function ProductDetail() {
                 />
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <i className={`${getFallbackIcon()} text-gray-400 text-6xl`}></i>
+                  <i className={`${getFallbackIcon()} text-gray-400 text-6xl md:text-8xl`}></i>
                 </div>
               )}
             </div>
@@ -278,25 +146,25 @@ export default function ProductDetail() {
             {/* Back button */}
             <button 
               onClick={handleGoBack}
-              className="absolute top-20 left-4 w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-40"
+              className="absolute top-20 md:top-24 left-4 md:left-8 w-10 h-10 md:w-12 md:h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-40"
               data-testid="button-back"
               title="Volver al catálogo"
             >
-              <i className="fas fa-arrow-left text-white"></i>
+              <i className="fas fa-arrow-left text-white text-sm md:text-base"></i>
             </button>
             
             {/* Thumbnails */}
-            {(product.images.length > 1 || product.videos?.length) && (
-              <div className="absolute bottom-20 left-0 w-full z-40 px-4">
-                <div className="flex gap-2 justify-center overflow-x-auto pb-2">
-                  {product.images.map((image, index) => (
+            {((product.images && product.images.length > 1) || (product.videos && product.videos.length)) && (
+              <div className="absolute bottom-20 md:bottom-24 left-0 w-full z-40 px-4 md:px-8">
+                <div className="flex gap-2 md:gap-4 justify-center overflow-x-auto pb-2">
+                  {product.images?.map((image, index) => (
                     <button
                       key={index}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedImageIndex(index);
                       }}
-                      className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all ${
                         selectedImageIndex === index 
                           ? 'border-white ring-2 ring-white/50' 
                           : 'border-white/50 hover:border-white'
@@ -314,10 +182,10 @@ export default function ProductDetail() {
                     <button
                       key={`video-${index}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-white/50 hover:border-white bg-black/50 flex items-center justify-center"
+                      className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 border-white/50 hover:border-white bg-black/50 flex items-center justify-center"
                       data-testid={`video-thumbnail-${index}`}
                     >
-                      <i className="fas fa-play text-white text-lg"></i>
+                      <i className="fas fa-play text-white text-lg md:text-xl"></i>
                     </button>
                   ))}
                 </div>
@@ -325,11 +193,11 @@ export default function ProductDetail() {
             )}
             
             {/* Product info at bottom */}
-            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 z-30">
-              <div className="max-w-md mx-auto lg:max-w-2xl space-y-3">
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 md:p-8 lg:p-12 z-30">
+              <div className="max-w-md mx-auto md:max-w-2xl lg:max-w-4xl space-y-3 md:space-y-4">
                 <div>
-                  <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">{product.name}</h1>
-                  <p className="text-white/90 text-lg">{product.description}</p>
+                  <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">{product.name}</h1>
+                  <p className="text-white/90 text-base md:text-lg lg:text-xl">{product.description}</p>
                 </div>
                 
                 {/* Rating */}
@@ -337,7 +205,7 @@ export default function ProductDetail() {
                   <div className="flex">
                     {renderStars(product.rating || 5)}
                   </div>
-                  <span className="text-sm text-white/80">({product.reviewCount} reseñas)</span>
+                  <span className="text-sm md:text-base text-white/80">({product.reviewCount || 0} reseñas)</span>
                 </div>
                 
                 {/* Price */}

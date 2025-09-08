@@ -256,22 +256,22 @@ export default function Catalog() {
   }
 
   return (
-    <div className="phone-frame">
-      <div className="phone-screen">
+    <div className="w-full min-h-screen bg-background">
+      <div className="w-full min-h-screen">
 
-        <div className="phone-content">
+        <div className="w-full min-h-screen">
           <TopBar />
           <WelcomeMessage />
           <UserActivityTracker />
           
-          <div id="hero-container" className="relative h-80 sm:h-96 lg:h-[500px] bg-gray-300 mt-0">
+          <div id="hero-container" className="relative h-80 sm:h-96 lg:h-[500px] xl:h-[600px] bg-gray-300 mt-0 w-full">
             <HeroSlider />
             
             <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-5 z-10 bg-black/10">
-              <h2 className="text-3xl font-bold mb-2 drop-shadow-lg">Tecnología de Vanguardia</h2>
-              <p className="text-lg mb-4 drop-shadow-md max-w-md">Descubre los últimos productos tecnológicos con la mejor calidad y precios</p>
+              <h2 className="text-3xl md:text-4xl xl:text-5xl font-bold mb-2 drop-shadow-lg">Tecnología de Vanguardia</h2>
+              <p className="text-lg md:text-xl xl:text-2xl mb-4 drop-shadow-md max-w-md md:max-w-2xl">Descubre los últimos productos tecnológicos con la mejor calidad y precios</p>
               <button 
-                className="hidden md:block bg-primary text-primary-foreground px-6 py-2 rounded-full font-semibold hover:bg-primary/90 transition-colors animate-pulse-ring"
+                className="hidden md:block bg-primary text-primary-foreground px-8 py-3 text-lg rounded-full font-semibold hover:bg-primary/90 transition-colors animate-pulse-ring"
                 data-testid="button-ver-catalogo"
               >
                 Ver Catálogo
@@ -287,41 +287,42 @@ export default function Catalog() {
             />
           </div>
 
-          <main className="px-4 py-6 pb-20 md:pb-6 space-y-6 main-container">
-            {/* All Products in Featured Style */}
-            <section>
-              <div className="mb-4 flex justify-center">
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-2 inline-flex gap-1 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => setShowOnlyOffers(false)}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
-                      !showOnlyOffers 
-                        ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-md scale-105' 
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
-                    }`}
-                    data-testid="button-filter-all"
-                  >
-                    <i className="fas fa-th-large"></i>
-                    All
-                  </button>
-                  
-                  <button
-                    onClick={() => setShowOnlyOffers(true)}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
-                      showOnlyOffers 
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md scale-105' 
-                        : 'text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
-                    }`}
-                    data-testid="button-filter-offers"
-                  >
-                    <i className="fas fa-fire animate-shake"></i>
-                    Ofertas
-                  </button>
+          <main className="w-full px-4 md:px-8 lg:px-12 xl:px-16 py-6 pb-20 md:pb-6 space-y-6">
+            <div className="max-w-[1600px] mx-auto">
+              {/* All Products in Featured Style */}
+              <section>
+                <div className="mb-6 flex justify-center">
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-2 inline-flex gap-1 shadow-sm border border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => setShowOnlyOffers(false)}
+                      className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
+                        !showOnlyOffers 
+                          ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-md scale-105' 
+                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                      }`}
+                      data-testid="button-filter-all"
+                    >
+                      <i className="fas fa-th-large"></i>
+                      All
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowOnlyOffers(true)}
+                      className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
+                        showOnlyOffers 
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md scale-105' 
+                          : 'text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                      }`}
+                      data-testid="button-filter-offers"
+                    >
+                      <i className="fas fa-fire animate-shake"></i>
+                      Ofertas
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 lg:gap-6 products-grid">
-                {allProducts.map((product) => (
-                  <ProductCard 
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6 lg:gap-8">
+                  {allProducts.map((product) => (
+                    <ProductCard 
                     key={product.id} 
                     product={product} 
                     layout="grid"
@@ -354,7 +355,7 @@ export default function Catalog() {
                 </div>
               </div>
             </section>
-
+            </div>
           </main>
 
           {/* Floating WhatsApp Button */}

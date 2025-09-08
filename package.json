@@ -95,7 +95,6 @@
     "zod": "^3.24.2",
     "zod-validation-error": "^3.4.0",
 
-    /* --- HERRAMIENTAS DE BUILD MOVIDAS A DEPENDENCIES --- */
     "vite": "^5.4.20",
     "@vitejs/plugin-react": "^4.7.0",
     "esbuild": "^0.25.9",

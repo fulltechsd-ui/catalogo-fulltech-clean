@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProductSchema, type InsertProduct, type Product, type Category } from "../../../shared/schema";
+import { insertProductSchema, type InsertProduct, type Product, type Category } from "@shared/schema";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";

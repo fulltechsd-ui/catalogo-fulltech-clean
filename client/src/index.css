@@ -119,6 +119,14 @@
     box-shadow: none;
     position: static;
   }
+  
+  /* Contenedor principal responsivo para pantallas grandes */
+  .catalog-main-container {
+    max-width: 1400px !important;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 .phone-notch {
@@ -147,6 +155,35 @@
 @media (min-width: 768px) {
   .phone-screen {
     border-radius: 0;
+  }
+}
+
+/* Mejoras adicionales para pantallas grandes */
+@media (min-width: 1024px) {
+  .catalog-main-container {
+    max-width: 1200px !important;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  /* Hero section para escritorio */
+  #hero-container {
+    height: 600px !important;
+  }
+}
+
+/* Pantallas muy grandes */
+@media (min-width: 1400px) {
+  .catalog-main-container {
+    max-width: 1400px !important;
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+  
+  /* Optimización para monitores ultrawide */
+  .product-grid-ultrawide {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 2rem;
   }
 }
 

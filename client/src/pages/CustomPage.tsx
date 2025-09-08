@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { TopBar } from "@/components/TopBar";
-import { Button } from "@/components/ui/button";
+import { TopBar } from "../components/TopBar";
+import { Button } from "./ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useInstantNavigation } from "@/hooks/useInstantNavigation";
+import { useInstantNavigation } from "../hooks/useInstantNavigation";
 
 interface CustomPageData {
   id: string;

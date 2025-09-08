@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { getConfigValue, useConfigLoader } from '@/lib/config';
+import { getConfigValue, useConfigLoader } from '../lib/config';
 
 export function Footer() {
   const [isExpanded, setIsExpanded] = useState(false);

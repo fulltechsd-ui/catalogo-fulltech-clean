@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { type HeroSlide } from "@shared/schema";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { HeroSlideForm } from "@/components/admin/HeroSlideForm";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { type HeroSlide } from "../../../shared/schema";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { HeroSlideForm } from "../components/admin/HeroSlideForm";
+import { apiRequest } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
 
 export default function AdminHeroSlides() {
   const { toast } = useToast();

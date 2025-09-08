@@ -1,8 +1,8 @@
 import { useState, useRef } from "react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { Button } from "./ui/button";
+import { useToast } from "../hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
 
 interface FileUploaderProps {
   onUploadComplete: (fileUrl: string) => void;

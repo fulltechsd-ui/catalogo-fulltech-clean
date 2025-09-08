@@ -1,11 +1,11 @@
-import { useAdmin } from "@/hooks/useAdmin";
+import { useAdmin } from "../hooks/useAdmin";
 import { useEffect, useState } from "react";
 import AdminProducts from "./AdminProducts";
 import AdminHeroSlides from "./AdminHeroSlides";
 import AdminRaffle from "./AdminRaffle";
-import { SiteConfigForm } from "@/components/admin/SiteConfigForm";
-import { LegalPagesManager } from "@/components/admin/LegalPagesManager";
-import { CustomPagesManager } from "@/components/admin/CustomPagesManager";
+import { SiteConfigForm } from "../components/admin/SiteConfigForm";
+import { LegalPagesManager } from "../components/admin/LegalPagesManager";
+import { CustomPagesManager } from "../components/admin/CustomPagesManager";
 import { CategoriesManager } from "../components/admin/CategoriesManager";
 
 export default function AdminDashboard() {

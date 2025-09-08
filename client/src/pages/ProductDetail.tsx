@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
-import { TopBar } from "@/components/TopBar";
-import { ImageCarousel } from "@/components/ImageCarousel";
-import type { Product } from "@shared/schema";
+import { TopBar } from "../components/TopBar";
+import { ImageCarousel } from "../components/ImageCarousel";
+import type { Product } from "../../../shared/schema";
 
 // Same product data - in a real app this would come from an API
 const sampleProducts: Product[] = [

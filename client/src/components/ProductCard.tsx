@@ -1,6 +1,6 @@
 import { ImageCarousel } from "./ImageCarousel";
 import { useLocation } from "wouter";
-import type { Product } from "@shared/schema";
+import type { Product } from "../../../shared/schema";
 
 interface ProductCardProps {
   product: Product;

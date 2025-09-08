@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useCustomer } from "../hooks/useCustomer";
-import { useCustomPages } from "../hooks/useCustomPages";
-import { useInstantNavigation } from "../hooks/useInstantNavigation";
-import { useConfigLoader, getConfigValue } from "../lib/config";
+import { useCustomer } from "@/hooks/useCustomer";
+import { useCustomPages } from "@/hooks/useCustomPages";
+import { useInstantNavigation } from "@/hooks/useInstantNavigation";
+import { useConfigLoader, getConfigValue } from "@/lib/config";
 import { Link } from "wouter";
-import type { CustomPage } from "../../../shared/schema";
+import type { CustomPage } from "@shared/schema";
 // Logo por defecto - emoji o texto
 const logoDefault = "data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234F46E5'/%3E%3Ctext x='20' y='28' text-anchor='middle' fill='white' font-family='sans-serif' font-size='16' font-weight='bold'%3EFT%3C/text%3E%3C/svg%3E";
 
@@ -200,7 +200,7 @@ export function TopBar() {
 
       {/* Dropdown Menu */}
       <div 
-        className={`absolute top-20 right-4 w-64 bg-white border border rounded-xl shadow-lg p-4 z-50 transition-all duration-200 ${
+        className={`absolute top-20 right-4 w-64 bg-white border border-border rounded-xl shadow-lg p-4 z-50 transition-all duration-200 ${
           isMenuOpen 
             ? 'opacity-100 visible translate-y-0' 
             : 'opacity-0 invisible -translate-y-2'
@@ -253,7 +253,7 @@ export function TopBar() {
               <span>Carrito</span>
             </button>
             
-            <hr className="my-2 border" />
+            <hr className="my-2 border-border" />
             
             {/* Páginas principales dinámicas */}
             {groupedPages.main && groupedPages.main.map((page) => (
@@ -295,7 +295,7 @@ export function TopBar() {
               <span>Contacto</span>
             </Link>
             
-            <hr className="my-2 border" />
+            <hr className="my-2 border-border" />
             
             <button 
               className="w-full flex items-center gap-3 p-3 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
@@ -351,7 +351,7 @@ export function TopBar() {
               <span>Contacto</span>
             </Link>
             
-            <hr className="my-2 border" />
+            <hr className="my-2 border-border" />
             
             {/* Login para usuarios no autenticados */}
             <button 

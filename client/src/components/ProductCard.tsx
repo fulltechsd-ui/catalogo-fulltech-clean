@@ -1,6 +1,6 @@
 import { ImageCarousel } from "./ImageCarousel";
 import { useLocation } from "wouter";
-import type { Product } from "../../../shared/schema";
+import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
   product: Product;
@@ -64,7 +64,7 @@ export function ProductCard({ product, layout }: ProductCardProps) {
 
   if (layout === "grid") {
     return (
-      <div className="product-card relative bg-card border border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer" onClick={handleViewProduct} data-product-id={product.id}>
+      <div className="product-card relative bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer" onClick={handleViewProduct} data-product-id={product.id}>
         <ImageCarousel
           images={product.images}
           videos={product.videos || []}
@@ -149,7 +149,7 @@ export function ProductCard({ product, layout }: ProductCardProps) {
   }
 
   return (
-    <div className="product-item bg-card border border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer" onClick={handleViewProduct}>
+    <div className="product-item bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer" onClick={handleViewProduct}>
       <div className="flex gap-4 p-4">
         <ImageCarousel
           images={product.images}

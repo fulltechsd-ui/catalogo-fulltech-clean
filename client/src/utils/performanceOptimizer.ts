@@ -212,8 +212,8 @@ export class PerformanceOptimizer {
       fcp: paint.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
       // Tiempo hasta contenido más grande
       lcp: paint.find(entry => entry.name === 'largest-contentful-paint')?.startTime || 0,
-      // Tiempo total  
-      totalTime: navigation.loadEventEnd - navigation.fetchStart
+      // Tiempo total
+      totalTime: navigation.loadEventEnd - navigation.navigationStart
     };
   }
 }

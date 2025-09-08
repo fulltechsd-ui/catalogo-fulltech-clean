@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useCustomer } from "../hooks/useCustomer";
+import { useCustomer } from "@/hooks/useCustomer";
 
 export function UserActivityTracker() {
   const { customer, isAuthenticated } = useCustomer();

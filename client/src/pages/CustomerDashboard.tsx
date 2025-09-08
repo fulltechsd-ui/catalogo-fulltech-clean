@@ -1,42 +1,41 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { type Customer, type CustomerActivity, type CustomerPurchase, type Referral, type MonthlyRaffle } from "@shared/schema";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Badge } from "../components/ui/badge";
-import { useToast } from "../hooks/use-toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 export function CustomerDashboard() {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
   // Obtener datos del cliente autenticado
-  const { data: customer, isLoading: customerLoading } = useQuery<Customer>({
+  const { data: customer, isLoading: customerLoading } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
   });
 
   // Obtener actividades del cliente
-  const { data: activities = [] } = useQuery<CustomerActivity[]>({
+  const { data: activities = [] } = useQuery({
     queryKey: ["/api/customer/activities"],
     enabled: !!customer,
   });
 
   // Obtener compras del cliente
-  const { data: purchases = [] } = useQuery<CustomerPurchase[]>({
+  const { data: purchases = [] } = useQuery({
     queryKey: ["/api/customer/purchases"],
     enabled: !!customer,
   });
 
   // Obtener referidos del cliente
-  const { data: referrals = [] } = useQuery<Referral[]>({
+  const { data: referrals = [] } = useQuery({
     queryKey: ["/api/customer/referrals"],
     enabled: !!customer,
   });
 
   // Obtener rifa actual
-  const { data: currentRaffle } = useQuery<MonthlyRaffle>({
+  const { data: currentRaffle } = useQuery({
     queryKey: ["/api/raffle/current"],
   });
 

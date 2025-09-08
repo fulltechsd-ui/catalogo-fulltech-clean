@@ -1,4 +1,4 @@
-import { useCustomer } from "../hooks/useCustomer";
+import { useCustomer } from "@/hooks/useCustomer";
 
 export function WelcomeMessage() {
   const { welcomeMessage, showWelcome, dismissWelcome } = useCustomer();

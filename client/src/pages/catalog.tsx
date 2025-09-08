@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from "react";
-import { TopBar } from "../components/TopBar";
-import { OptimizedImage } from "../components/OptimizedImage";
-import { useOptimizedProducts } from "../hooks/useOptimizedProducts";
-import { useCacheManager } from "../utils/cacheManager";
-import { WelcomeMessage } from "../components/WelcomeMessage";
-import { UserActivityTracker } from "../components/UserActivityTracker";
+import { TopBar } from "@/components/TopBar";
+import { OptimizedImage } from "@/components/OptimizedImage";
+import { useOptimizedProducts } from "@/hooks/useOptimizedProducts";
+import { useCacheManager } from "@/utils/cacheManager";
+import { WelcomeMessage } from "@/components/WelcomeMessage";
+import { UserActivityTracker } from "@/components/UserActivityTracker";
 
 // Lazy loading de componentes no críticos
-const HeroSlider = lazy(() => import("../components/HeroSlider").then(m => ({ default: m.HeroSlider })));
-const CategoryFilters = lazy(() => import("../components/CategoryFilters").then(m => ({ default: m.CategoryFilters })));
-const ProductCard = lazy(() => import("../components/ProductCard").then(m => ({ default: m.ProductCard })));
-import type { Product, Category } from "../../../shared/schema";
+const HeroSlider = lazy(() => import("@/components/HeroSlider").then(m => ({ default: m.HeroSlider })));
+const CategoryFilters = lazy(() => import("@/components/CategoryFilters").then(m => ({ default: m.CategoryFilters })));
+const ProductCard = lazy(() => import("@/components/ProductCard").then(m => ({ default: m.ProductCard })));
+import type { Product, Category } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 
 // Sample products data with multiple images and videos
@@ -372,7 +372,7 @@ export default function Catalog() {
           </button>
 
           {/* Expandable Footer */}
-          <footer className={`fixed bottom-0 left-0 w-full bg-card border-t border z-40 transition-all duration-500 ${
+          <footer className={`fixed bottom-0 left-0 w-full bg-card border-t border-border z-40 transition-all duration-500 ${
             isFooterExpanded ? 'h-96' : 'h-14'
           }`}>
             {/* Expanded Content */}

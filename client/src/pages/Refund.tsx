@@ -1,4 +1,4 @@
-import { TopBar } from "../components/TopBar";
+import { TopBar } from "@/components/TopBar";
 
 export default function Refund() {
   return (
@@ -9,7 +9,7 @@ export default function Refund() {
           <TopBar />
           
           <div className="pt-20 px-4 py-8 max-w-4xl mx-auto">
-            <div className="bg-card rounded-xl shadow-sm border border p-6">
+            <div className="bg-card rounded-xl shadow-sm border border-border p-6">
               <h1 className="text-2xl font-bold text-primary mb-6">Política de Reembolso</h1>
               
               <div className="prose prose-sm max-w-none text-card-foreground">

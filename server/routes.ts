@@ -442,13 +442,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 🔍 DEBUG LOG - File serving
       console.log("=== SERVE FILE DEBUG ===");
       console.log("Requested objectPath:", req.params.objectPath);
-      console.log("Full path being searched:", `/objects/${req.params.objectPath}`);
+      console.log("Direct path being searched:", req.params.objectPath);
       console.log("=========================");
 
-      const objectFile = await objectStorageService.getObjectEntityFile(
-        `/objects/${req.params.objectPath}`,
-      );
-      await objectStorageService.downloadObject(objectFile, res);
+      await objectStorageService.downloadObject(req.params.objectPath, res);
     } catch (error) {
       console.error("Error serving uploaded file:", error);
       if (error instanceof ObjectNotFoundError) {
@@ -461,13 +458,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve public assets from object storage
   app.get("/public-images/:filePath(*)", async (req, res) => {
     try {
-      const file = await objectStorageService.searchPublicObject(
-        req.params.filePath,
-      );
-      if (!file) {
-        return res.status(404).json({ error: "File not found" });
-      }
-      await objectStorageService.downloadObject(file, res);
+      // TODO: Fix public object search - temporarily disabled
+      return res.status(404).json({ error: "Public assets temporarily unavailable" });
     } catch (error) {
       console.error("Error serving public image:", error);
       return res.status(500).json({ error: "Error serving image" });

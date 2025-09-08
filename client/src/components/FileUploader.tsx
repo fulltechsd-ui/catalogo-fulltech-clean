@@ -69,8 +69,9 @@ export function FileUploader({
     try {
       // 1. Obtener URL de subida
       const uploadResponse = await apiRequest("POST", "/api/upload-url");
-      const uploadData = await uploadResponse.json() as { uploadURL: string };
-      const uploadURL = uploadData.uploadURL;
+      const uploadData = await uploadResponse.json() as { uploadUrl: string; objectPath: string };
+      const uploadURL = uploadData.uploadUrl;
+      const objectPath = uploadData.objectPath;
 
       // 🔍 DEBUG LOG - Frontend upload flow
       console.log("=== FRONTEND UPLOAD DEBUG ===");
@@ -93,11 +94,10 @@ export function FileUploader({
         throw new Error(`Upload failed: ${fileUploadResponse.status}`);
       }
 
-      // 3. Extraer el ID del objeto de la URL
-      const objectId = extractObjectIdFromURL(uploadURL);
-      const localImageUrl = `/uploads/uploads/${objectId}`;
+      // 3. Usar el objectPath correcto del backend
+      const localImageUrl = `/uploads/${objectPath}`;
 
-      console.log("Extracted objectId:", objectId);
+      console.log("Using objectPath from backend:", objectPath);
       console.log("Constructed localImageUrl:", localImageUrl);
 
       // 4. Notificar al componente padre

@@ -69,8 +69,8 @@ export function FileUploader({
     try {
       // 1. Obtener URL de subida
       const uploadResponse = await apiRequest("POST", "/api/upload-url");
-      const uploadData = await uploadResponse.json() as { uploadURL: string };
-      const uploadURL = uploadData.uploadURL;
+      const uploadData = await uploadResponse.json() as { uploadUrl: string; objectPath: string };
+      const uploadURL = uploadData.uploadUrl;
 
       // 2. Subir archivo directamente a Google Cloud Storage
       const fileUploadResponse = await fetch(uploadURL, {
@@ -85,9 +85,8 @@ export function FileUploader({
         throw new Error(`Upload failed: ${fileUploadResponse.status}`);
       }
 
-      // 3. Extraer el ID del objeto de la URL
-      const objectId = extractObjectIdFromURL(uploadURL);
-      const localImageUrl = `/uploads/uploads/${objectId}`;
+      // 3. Usar el objectPath devuelto por el backend
+      const localImageUrl = `/uploads/${uploadData.objectPath}`;
 
       // 4. Notificar al componente padre
       onUploadComplete(localImageUrl);

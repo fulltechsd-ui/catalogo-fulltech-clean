@@ -1,4 +1,4 @@
-// NUEVO CÓDIGO COMPLETO Y VERIFICADO - Reemplaza todo el archivo
+// objectStorage.ts — versión sólida para SeaweedFS/MinIO
 import {
   S3Client,
   PutObjectCommand,
@@ -10,21 +10,26 @@ import { Response } from "express";
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
-// 1. Configuración del cliente S3. Automáticamente lee los nuevos Secrets.
+const REQUIRED = ["S3_ENDPOINT", "S3_ACCESS_KEY", "S3_SECRET_KEY", "S3_BUCKET_NAME"] as const;
+for (const key of REQUIRED) {
+  if (!process.env[key]) {
+    console.warn(`[objectStorage] Falta env ${key}. Revisa tus Secrets.`);
+  }
+}
+
 const s3Client = new S3Client({
   endpoint: process.env.S3_ENDPOINT,
-  region: 'us-east-1', // Valor estándar, no es crítico para SeaweedFS/MinIO
+  region: "us-east-1",            // genérico; Seaweed/MinIO no lo usan realmente
   credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY || '',
-    secretAccessKey: process.env.S3_SECRET_KEY || '',
+    accessKeyId: process.env.S3_ACCESS_KEY || "",
+    secretAccessKey: process.env.S3_SECRET_KEY || "",
   },
-  forcePathStyle: true, // ¡Muy importante para que funcione con SeaweedFS!
+  forcePathStyle: true,           // 🔑 necesario para SeaweedFS/MinIO
 });
 
-// Extraer el nombre del bucket de los Secrets para usarlo fácilmente
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || '';
+const BUCKET_NAME = process.env.S3_BUCKET_NAME || "";
 
-// 2. Definimos un error personalizado, igual que en tu código original
+/** Error semántico cuando el objeto no existe */
 export class ObjectNotFoundError extends Error {
   constructor(message = "Object not found") {
     super(message);
@@ -33,103 +38,110 @@ export class ObjectNotFoundError extends Error {
   }
 }
 
-// 3. Nueva clase de servicio de almacenamiento, imitando la estructura de la tuya
-export class ObjectStorageService {
+/** Normaliza keys: sin barras iniciales, sin espacios raros */
+function normalizeKey(key: string): string {
+  return (key || "").replace(/^\/+/, "").trim();
+}
 
-  // Función para verificar si un objeto existe
+/** Detección amplia de “no existe” para S3, MinIO y Seaweed */
+function isNotFoundError(err: any): boolean {
+  const name = err?.name || err?.Code || err?.code;
+  const status = err?.$metadata?.httpStatusCode;
+  return (
+    name === "NotFound" ||
+    name === "NoSuchKey" ||
+    name === "NoSuchBucket" ||
+    status === 404
+  );
+}
+
+/** Inferencia muy básica de content-type por extensión (sin deps) */
+function guessContentType(key: string): string {
+  const ext = key.split(".").pop()?.toLowerCase();
+  switch (ext) {
+    case "png": return "image/png";
+    case "jpg":
+    case "jpeg": return "image/jpeg";
+    case "gif": return "image/gif";
+    case "webp": return "image/webp";
+    case "svg": return "image/svg+xml";
+    case "mp4": return "video/mp4";
+    case "webm": return "video/webm";
+    case "json": return "application/json";
+    case "txt": return "text/plain; charset=utf-8";
+    case "pdf": return "application/pdf";
+    default: return "application/octet-stream";
+  }
+}
+
+export class ObjectStorageService {
+  /** HEAD para saber si existe (sin traer el body) */
   private async fileExists(objectKey: string): Promise<boolean> {
+    const Key = normalizeKey(objectKey);
     try {
-      const command = new HeadObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: objectKey,
-      });
-      await s3Client.send(command);
+      await s3Client.send(new HeadObjectCommand({ Bucket: BUCKET_NAME, Key }));
       return true;
-    } catch (error: any) {
-      if (error.name === 'NotFound') {
-        return false;
-      }
-      throw error; // Lanza otros errores
+    } catch (err: any) {
+      if (isNotFoundError(err)) return false;
+      throw err;
     }
   }
 
-  // Genera una URL firmada para que el frontend pueda subir un archivo.
-  // Reemplaza a tu 'getObjectEntityUploadURL' original.
+  /**
+   * Devuelve URL firmada para subir desde el front y la key a guardar.
+   * Guarda SIEMPRE el `objectPath` en BD (ej: `uploads/uuid`).
+   */
   async getObjectEntityUploadURL(): Promise<{ uploadUrl: string; objectPath: string }> {
-    // Generamos un nombre único para el archivo para evitar colisiones.
-    // Lo guardamos en una carpeta 'uploads' dentro del bucket.
-    const objectKey = `uploads/${randomUUID()}`;
-
-    const command = new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: objectKey,
-    });
-
-    // Genera la URL de subida con una validez de 15 minutos (900 segundos)
-    const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 900 });
-
-    // Devolvemos la URL y la ruta/llave del objeto.
-    // ¡IMPORTANTE! Debes guardar 'objectPath' en tu base de datos.
-    return { uploadUrl, objectPath: objectKey };
+    const objectPath = `uploads/${randomUUID()}`; // sin extensión; opcional si quieres forzar .png/.jpg
+    const uploadUrl = await getSignedUrl(
+      s3Client,
+      new PutObjectCommand({ Bucket: BUCKET_NAME, Key: objectPath }),
+      { expiresIn: 900 } // 15 min
+    );
+    return { uploadUrl, objectPath };
   }
 
-  // Descarga un archivo y lo envía como respuesta al cliente (ej: para mostrar una imagen).
-  // Reemplaza a tu 'downloadObject' original.
-  async downloadObject(objectKey: string, res: Response, cacheTtlSec: number = 3600) {
+  /**
+   * Stream del objeto hacia el response (proxy). Usa cabeceras cacheables.
+   * Llama: GET /uploads/:objectPath(*) -> downloadObject(objectPath, res)
+   */
+  async downloadObject(objectKey: string, res: Response, cacheTtlSec = 3600) {
+    const Key = normalizeKey(objectKey);
     try {
-      const getObjectCommand = new GetObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: objectKey,
-      });
+      const s3Res = await s3Client.send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key }));
+      const body = s3Res.Body as Readable;
 
-      const response = await s3Client.send(getObjectCommand);
-      const stream = response.Body as Readable;
+      // content-type de S3 o inferido por extensión
+      const contentType = s3Res.ContentType || guessContentType(Key);
 
-      // Establecer las cabeceras de la respuesta
       res.set({
-        "Content-Type": response.ContentType || "application/octet-stream",
-        "Content-Length": response.ContentLength?.toString(),
+        "Content-Type": contentType,
+        ...(s3Res.ContentLength ? { "Content-Length": String(s3Res.ContentLength) } : {}),
         "Cache-Control": `public, max-age=${cacheTtlSec}`,
       });
 
-      stream.pipe(res);
-
-    } catch (error: any) {
-      console.error("Error downloading file:", error);
-      if (error.name === 'NoSuchKey') {
-         if (!res.headersSent) {
-          res.status(404).json({ error: "File not found" });
-        }
-      } else {
-        if (!res.headersSent) {
+      body.pipe(res);
+    } catch (err: any) {
+      console.error("Error downloading file:", err);
+      if (!res.headersSent) {
+        if (isNotFoundError(err)) {
+          res.status(404).json({ error: "File not found", key: Key });
+        } else {
           res.status(500).json({ error: "Error streaming file" });
         }
       }
     }
   }
 
-  // Obtiene un archivo del storage. Reemplaza a tu 'getObjectEntityFile' original.
-  async getObjectEntityFile(objectPath: string): Promise<Readable | undefined> {
-    if (!objectPath) {
-      throw new ObjectNotFoundError("Object path is empty");
-    }
+  /** Devuelve el stream del objeto (para usos internos si lo necesitas) */
+  async getObjectEntityFile(objectPath: string): Promise<Readable> {
+    const Key = normalizeKey(objectPath);
+    if (!Key) throw new ObjectNotFoundError("Object path is empty");
 
-    const exists = await this.fileExists(objectPath);
-    if (!exists) {
-      throw new ObjectNotFoundError(`Object with path "${objectPath}" not found.`);
-    }
+    const exists = await this.fileExists(Key);
+    if (!exists) throw new ObjectNotFoundError(`Object "${Key}" not found`);
 
-    const command = new GetObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: objectPath,
-    });
-
-    const response = await s3Client.send(command);
-    return response.Body as Readable;
+    const res = await s3Client.send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key }));
+    return res.Body as Readable;
   }
-
-  // ¡IMPORTANTE! LAS SIGUIENTES FUNCIONES DE TU CÓDIGO VIEJO YA NO SON NECESARIAS
-  // porque el nuevo sistema es más simple. No necesitas buscar en directorios públicos/privados.
-  // Cualquier archivo que necesites mostrar, simplemente obtienes su 'objectPath' de la base de datos
-  // y lo pasas a 'downloadObject'.
 }

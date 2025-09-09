@@ -1,129 +1,123 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 
-// Robust path helper for Docker/container environments
+/* ----------------------- Paths robustos para contenedores ----------------------- */
 function getProjectRoot(): string {
   try {
-    // Try to use import.meta.url first (modern Node.js)
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     return path.resolve(__dirname, "..");
-  } catch (error) {
-    // Fallback for environments where import.meta is not available
+  } catch {
     console.log("Falling back to process.cwd() for path resolution");
     return process.cwd();
   }
 }
 
-// Validate required environment variables at startup
+/* ------------------ Validación mínima de variables de entorno ------------------ */
 function validateEnvironment() {
-  const requiredEnvVars = ['DATABASE_URL'];
-  const missing = requiredEnvVars.filter(name => !process.env[name]);
-  
+  const requiredEnvVars = ["DATABASE_URL"];
+  const missing = requiredEnvVars.filter((name) => !process.env[name]);
+
   if (missing.length > 0) {
-    console.error(`Missing required environment variables: ${missing.join(', ')}`);
+    console.error(`Missing required environment variables: ${missing.join(", ")}`);
     process.exit(1);
   }
-  
-  // Set NODE_ENV to production if not explicitly set
-  if (!process.env.NODE_ENV) {
-    process.env.NODE_ENV = 'production';
-    console.log('NODE_ENV not set, defaulting to production');
-  }
-  
-  // Log base URL for Google OAuth configuration
-  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
-    ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-    : `https://3d2437f9e7f2.replit.app`;
-  console.log('BASE_URL:', baseUrl);
-  console.log('Google OAuth URLs:');
-  console.log('  Authorized JavaScript origins:', baseUrl);
-  console.log('  Authorized redirect URIs:', `${baseUrl}/api/auth/google/callback`);
-}
 
-// Validate environment before starting the server
+  if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = "production";
+    console.log("NODE_ENV not set, defaulting to production");
+  }
+
+  const baseUrl =
+    process.env.BASE_URL
+      || (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : `https://3d2437f9e7f2.replit.app`);
+
+  console.log("BASE_URL:", baseUrl);
+  console.log("Google OAuth URLs:");
+  console.log("  Authorized JavaScript origins:", baseUrl);
+  console.log("  Authorized redirect URIs:", `${baseUrl}/api/auth/google/callback`);
+}
 validateEnvironment();
 
+/* --------------------------------- App --------------------------------- */
 const app = express();
+
+// si estás detrás de proxy/cdn (Easypanel/Nginx), avisa a Express
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+/* --------------------------- Logger simple de API --------------------------- */
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  const p = req.path;
+  let capturedJsonResponse: any;
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
+  const originalResJson = res.json.bind(res);
+  (res as any).json = (bodyJson: any, ...args: any[]) => {
     capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+    return originalResJson(bodyJson, ...args);
   };
 
   res.on("finish", () => {
+    if (!p.startsWith("/api")) return;
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+    let logLine = `${req.method} ${p} ${res.statusCode} in ${duration}ms`;
+    if (capturedJsonResponse) {
+      // evita log infinito
+      const short = JSON.stringify(capturedJsonResponse);
+      logLine += ` :: ${short.length > 400 ? short.slice(0, 400) + "…" : short}`;
     }
+    log(logLine);
   });
 
   next();
 });
 
-// Graceful shutdown handling
+/* --------------------------- Apagado elegante --------------------------- */
 let server: any = null;
 
 const gracefulShutdown = (signal: string) => {
-  log(`Received ${signal}. Starting graceful shutdown...`);
-  
+  log(`Received ${signal}. Starting graceful shutdown…`);
   if (server) {
     server.close(() => {
-      log('HTTP server closed.');
+      log("HTTP server closed.");
       process.exit(0);
     });
-
-    // Force close after 10 seconds
     setTimeout(() => {
-      log('Could not close connections in time, forcefully shutting down');
+      log("Could not close connections in time, forcefully shutting down");
       process.exit(1);
-    }, 10000);
+    }, 10_000);
   } else {
     process.exit(0);
   }
 };
 
-// Listen for termination signals
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
-// Handle uncaught exceptions and rejections
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  gracefulShutdown('uncaughtException');
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  gracefulShutdown("uncaughtException");
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  gracefulShutdown('unhandledRejection');
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  gracefulShutdown("unhandledRejection");
 });
 
+/* --------------------------------- Boot --------------------------------- */
 (async () => {
   try {
+    // registra TODAS las rutas/API primero
     server = await registerRoutes(app);
 
-    // 🔧 Middleware de errores MEJORADO (no tira el server y da detalle útil)
+    // middleware global de errores (no tumba el proceso)
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       const status = err?.status || err?.statusCode || 500;
       const payload = {
@@ -132,76 +126,57 @@ process.on('unhandledRejection', (reason, promise) => {
         code: err?.code ?? "ERR",
         detail: err?.detail,
       };
-
-      // Log detallado para depurar (FK 23503, etc.)
-      console.error("[API ERROR]", {
-        ...payload,
-        stack: err?.stack,
-      });
-
-      if (res.headersSent) return; // evita doble respuesta
+      console.error("[API ERROR]", { ...payload, stack: err?.stack });
+      if (res.headersSent) return;
       res.status(status).json(payload);
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    
-    // Force production mode in Docker/container environments to avoid vite.ts import.meta issues
-    const isProduction = process.env.NODE_ENV === "production" || 
-                        !process.env.REPLIT_DEV_DOMAIN ||
-                        process.env.EASYPANEL === "true" ||
-                        app.get("env") === "production";
-    
-    console.log(`Environment detection:`);
-    console.log(`  NODE_ENV: ${process.env.NODE_ENV}`);
-    console.log(`  app.get("env"): ${app.get("env")}`);
-    console.log(`  REPLIT_DEV_DOMAIN: ${process.env.REPLIT_DEV_DOMAIN || 'not set'}`);
-    console.log(`  Using production mode: ${isProduction}`);
-    
+    // sólo inicia Vite en desarrollo; en prod sirve dist/public
+    const isProduction =
+      process.env.NODE_ENV === "production" ||
+      !process.env.REPLIT_DEV_DOMAIN ||
+      process.env.EASYPANEL === "true" ||
+      app.get("env") === "production";
+
+    console.log(`Environment detection:
+  NODE_ENV: ${process.env.NODE_ENV}
+  app.get("env"): ${app.get("env")}
+  REPLIT_DEV_DOMAIN: ${process.env.REPLIT_DEV_DOMAIN || "not set"}
+  Using production mode: ${isProduction}`);
+
     if (!isProduction) {
-      console.log("Starting Vite development server...");
+      console.log("Starting Vite development server…");
       await setupVite(app, server);
     } else {
-      console.log("Starting production static file server...");
-      // Serve static files in production with robust absolute paths
+      console.log("Starting production static file server…");
       const projectRoot = getProjectRoot();
-      
-      // Correct path: files are built to dist/public (not client/dist)
       const distPath = path.resolve(projectRoot, "dist", "public");
-      
       console.log(`Looking for static files in: ${distPath}`);
-      
-      // Verify the dist directory exists
+
       if (!fs.existsSync(distPath)) {
         console.error(`Build directory not found: ${distPath}`);
-        console.error("Available directories:");
         try {
-          const projectContents = fs.readdirSync(projectRoot);
-          console.error(`Project root contents: ${projectContents.join(', ')}`);
-          
+          const rootContents = fs.readdirSync(projectRoot);
+          console.error(`Project root contents: ${rootContents.join(", ")}`);
           const distDir = path.resolve(projectRoot, "dist");
           if (fs.existsSync(distDir)) {
             const distContents = fs.readdirSync(distDir);
-            console.error(`Dist directory contents: ${distContents.join(', ')}`);
+            console.error(`Dist directory contents: ${distContents.join(", ")}`);
           }
-        } catch (e) {
+        } catch {
           console.error("Could not read directory contents");
         }
-        console.error("Make sure to run 'npm run build' before starting in production");
+        console.error("Run 'npm run build' before starting in production");
         process.exit(1);
       }
-      
+
       console.log(`Successfully found static files at: ${distPath}`);
-      
-      // Serve static files from dist/public
       app.use(express.static(distPath));
-      
-      // Fallback to index.html for client-side routing (SPA)
+
+      // SPA fallback
       app.use("*", (_req, res) => {
         const indexPath = path.resolve(distPath, "index.html");
         console.log(`Attempting to serve index.html from: ${indexPath}`);
-        
         if (fs.existsSync(indexPath)) {
           res.sendFile(indexPath);
         } else {
@@ -211,46 +186,33 @@ process.on('unhandledRejection', (reason, promise) => {
       });
     }
 
-    // ALWAYS serve the app on the port specified in the environment variable PORT
-    // Other ports are firewalled. Default to 5000 if not specified.
-    // this serves both the API and the client.
-    // It is the only port that is not firewalled.
-    const port = parseInt(process.env.PORT || '5000', 10);
-    
-    server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, () => {
-      log(`serving on port ${port}`);
-    });
+    // PORT obligatorio (5000 por defecto)
+    const port = Number.parseInt(process.env.PORT || "5000", 10);
+    server.listen(
+      { port, host: "0.0.0.0", reusePort: true },
+      () => log(`serving on port ${port}`),
+    );
 
-    // Handle server listen errors
-    server.on('error', (error: any) => {
-      if (error.code === 'EADDRINUSE') {
+    server.on("error", (error: any) => {
+      if (error?.code === "EADDRINUSE") {
         console.error(`Port ${port} is already in use`);
       } else {
-        console.error('Server error:', error);
+        console.error("Server error:", error);
       }
       process.exit(1);
     });
-
-  } catch (error) {
-    console.error('Critical error during server startup:', error);
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
-    
-    // Additional error details for debugging
+  } catch (error: any) {
+    console.error("Critical error during server startup:", error);
+    console.error("Error stack:", error?.stack || "No stack trace available");
     if (error instanceof Error) {
-      console.error('Error name:', error.name);
-      console.error('Error message:', error.message);
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
     }
-    
-    console.error('Environment details:');
-    console.error('  Working directory:', process.cwd());
-    console.error('  Node version:', process.version);
-    console.error('  Platform:', process.platform);
-    console.error('  Architecture:', process.arch);
-    
+    console.error("Environment details:");
+    console.error("  Working directory:", process.cwd());
+    console.error("  Node version:", process.version);
+    console.error("  Platform:", process.platform);
+    console.error("  Architecture:", process.arch);
     process.exit(1);
   }
 })();

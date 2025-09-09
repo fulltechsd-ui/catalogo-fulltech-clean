@@ -123,12 +123,24 @@ process.on('unhandledRejection', (reason, promise) => {
   try {
     server = await registerRoutes(app);
 
+    // 🔧 Middleware de errores MEJORADO (no tira el server y da detalle útil)
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
-      const message = err.message || "Internal Server Error";
+      const status = err?.status || err?.statusCode || 500;
+      const payload = {
+        error: "Internal",
+        message: err?.message || "Internal Server Error",
+        code: err?.code ?? "ERR",
+        detail: err?.detail,
+      };
 
-      res.status(status).json({ message });
-      throw err;
+      // Log detallado para depurar (FK 23503, etc.)
+      console.error("[API ERROR]", {
+        ...payload,
+        stack: err?.stack,
+      });
+
+      if (res.headersSent) return; // evita doble respuesta
+      res.status(status).json(payload);
     });
 
     // importantly only setup vite in development and after

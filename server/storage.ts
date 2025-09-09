@@ -616,9 +616,17 @@ export class DatabaseStorage implements IStorage {
     return updatedProduct;
   }
 
-  async deleteProduct(id: string): Promise<void> {
-    await db.delete(products).where(eq(products.id, id));
-  }
+ async deleteProduct(id: string): Promise<void> {
+  // Trae el producto (si no existe, salimos sin romper)
+  const [existing] = await db.select().from(products).where(eq(products.id, id));
+  if (!existing) return;
+
+  // TODO opcional:
+  // - Si guardas `imageUrl` y deseas borrar el archivo en S3/seaweed,
+  //   hazlo aquí con tu ObjectStorageService (aún no hay método delete en objectStorage.ts).
+
+  await db.delete(products).where(eq(products.id, id));
+}
 
   // Hero slide operations
   async getAllHeroSlides(): Promise<HeroSlide[]> {

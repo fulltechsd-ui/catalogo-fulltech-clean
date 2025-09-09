@@ -290,31 +290,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch participants" });
     }
   });
-  
-// Public routes for products (catalog)
-app.get("/api/products", async (req, res) => {
-  try {
-    const products = await storage.getAllProducts();
-    const normalized = products.map((p: any) => {
-      // Evita duplicar "uploads/" en el front al construir la URL
-      if (p?.imageUrl && typeof p.imageUrl === "string") {
-        p.imageUrl = p.imageUrl.replace(/^\/+/, "").replace(/^uploads\//, "");
-      }
-      return p;
-    });
-    res.json(normalized);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).json({ error: "Failed to fetch products" });
-  }
-});
 
+  // Public routes for products (catalog)
+  app.get("/api/products", async (req, res) => {
+    try {
+      const products = await storage.getAllProducts();
+      // Normaliza la ruta de la imagen para evitar duplicar "uploads/"
+      const normalized = products.map((p: any) => {
+        if (p?.imageUrl && typeof p.imageUrl === "string") {
+          p.imageUrl = p.imageUrl
+            .replace(/^\/+/, "")        // elimina barras al inicio
+            .replace(/^uploads\//, ""); // elimina prefijo uploads/ duplicado
+        }
+        return p;
+      });
+      res.json(normalized);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
 
   app.get("/api/products/:id", async (req, res) => {
     try {
       const product = await storage.getProduct(req.params.id);
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
+      }
+      // Normaliza imageUrl de un solo producto para consistencia
+      if (product.imageUrl && typeof product.imageUrl === "string") {
+        product.imageUrl = product.imageUrl
+          .replace(/^\/+/, "")
+          .replace(/^uploads\//, "");
       }
       res.json(product);
     } catch (error) {
@@ -356,16 +363,25 @@ app.get("/api/products", async (req, res) => {
     }
   });
 
-app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
-  try {
-    await storage.deleteProduct(req.params.id);
-    return res.status(204).end(); // <— antes devolvías JSON; mejor 204
-  } catch (error) {
-    console.error("Error deleting product:", error);
-    res.status(500).json({ error: "Failed to delete product" });
-  }
-});
+  // ✅ Devuelve 204 No Content
+  app.delete("/api/admin/products/:id", requireAdmin, async (req, res, next) => {
+    try {
+      await storage.deleteProduct(req.params.id);
+      return res.status(204).end();
+    } catch (error) {
+      return next(error);
+    }
+  });
 
+  // ✅ Ruta espejo por si el front llama a /api/products/:id
+  app.delete("/api/products/:id", requireAdmin, async (req, res, next) => {
+    try {
+      await storage.deleteProduct(req.params.id);
+      return res.status(204).end();
+    } catch (error) {
+      return next(error);
+    }
+  });
 
   // Public routes for hero slides
   app.get("/api/hero-slides", async (req, res) => {
@@ -427,11 +443,9 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   // --- CÓDIGO FINAL Y CORREGIDO ---
   app.post("/api/upload-url", requireAdmin, async (req, res) => {
     try {
-      // CORRECCIÓN: Usamos 'uploadUrl' (con 'l' minúscula) para que coincida
+      // CORRECCIÓN: usamos 'uploadUrl' (minúscula) y 'objectPath'
       const { uploadUrl, objectPath } =
         await objectStorageService.getObjectEntityUploadURL();
-
-      // Ahora los nombres aquí coinciden con los de arriba
       res.json({ uploadUrl, objectPath });
     } catch (error) {
       console.error("Error getting upload URL:", error);
@@ -744,15 +758,8 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
   // Object storage routes for logo upload
   app.post("/api/objects/upload", requireAdmin, async (req, res) => {
     try {
-      // Nota: Es más eficiente crear 'objectStorageService' una sola vez fuera de la ruta,
-      // como ya lo tienes en la línea 371.
-      // const objectStorageService = new ObjectStorageService();
-
-      // Obtenemos los dos valores de la nueva función
       const { uploadUrl, objectPath } =
         await objectStorageService.getObjectEntityUploadURL();
-
-      // Enviamos ambos valores al frontend
       res.json({ uploadUrl, objectPath });
     } catch (error) {
       console.error("Error getting upload URL:", error);
@@ -799,7 +806,6 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
           .json({ error: "Datos inválidos", details: error.errors });
       }
       if (error.code === "23505") {
-        // Unique constraint violation
         return res
           .status(400)
           .json({ error: "Ya existe una categoría con ese slug" });
@@ -827,7 +833,6 @@ app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
           .json({ error: "Datos inválidos", details: error.errors });
       }
       if (error.code === "23505") {
-        // Unique constraint violation
         return res
           .status(400)
           .json({ error: "Ya existe una categoría con ese slug" });

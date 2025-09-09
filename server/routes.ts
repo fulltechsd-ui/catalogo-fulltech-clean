@@ -290,17 +290,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch participants" });
     }
   });
+  
+// Public routes for products (catalog)
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await storage.getAllProducts();
+    const normalized = products.map((p: any) => {
+      // Evita duplicar "uploads/" en el front al construir la URL
+      if (p?.imageUrl && typeof p.imageUrl === "string") {
+        p.imageUrl = p.imageUrl.replace(/^\/+/, "").replace(/^uploads\//, "");
+      }
+      return p;
+    });
+    res.json(normalized);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products" });
+  }
+});
 
-  // Public routes for products (catalog)
-  app.get("/api/products", async (req, res) => {
-    try {
-      const products = await storage.getAllProducts();
-      res.json(products);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      res.status(500).json({ error: "Failed to fetch products" });
-    }
-  });
 
   app.get("/api/products/:id", async (req, res) => {
     try {
@@ -348,15 +356,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
-    try {
-      await storage.deleteProduct(req.params.id);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      res.status(500).json({ error: "Failed to delete product" });
-    }
-  });
+app.delete("/api/admin/products/:id", requireAdmin, async (req, res) => {
+  try {
+    await storage.deleteProduct(req.params.id);
+    return res.status(204).end(); // <— antes devolvías JSON; mejor 204
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Failed to delete product" });
+  }
+});
+
 
   // Public routes for hero slides
   app.get("/api/hero-slides", async (req, res) => {

@@ -9,6 +9,7 @@ export default function ProductDetail() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedVideoIndex, setSelectedVideoIndex] = useState(-1); // -1 means no video selected
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Fetch real products from API
@@ -119,13 +120,20 @@ export default function ProductDetail() {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <div className="w-full min-h-screen">
-        <div className="w-full min-h-screen">
           {/* Full screen product image */}
           <div className="relative w-full h-screen">
-            {/* Product Image Background */}
+            {/* Product Image/Video Background */}
             <div className="absolute inset-0" onClick={() => setIsFullscreen(true)}>
-              {product.images && product.images.length > 0 && product.images[selectedImageIndex] ? (
+              {selectedVideoIndex >= 0 && product.videos && product.videos[selectedVideoIndex] ? (
+                <video 
+                  src={product.videos[selectedVideoIndex]}
+                  className="w-full h-full object-cover cursor-pointer"
+                  controls
+                  autoPlay
+                  muted
+                  loop
+                />
+              ) : product.images && product.images.length > 0 && product.images[selectedImageIndex] ? (
                 <img 
                   src={product.images[selectedImageIndex]}
                   alt={product.name}
@@ -163,9 +171,10 @@ export default function ProductDetail() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedImageIndex(index);
+                        setSelectedVideoIndex(-1); // Reset video selection
                       }}
                       className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImageIndex === index 
+                        selectedImageIndex === index && selectedVideoIndex === -1
                           ? 'border-white ring-2 ring-white/50' 
                           : 'border-white/50 hover:border-white'
                       }`}
@@ -181,8 +190,16 @@ export default function ProductDetail() {
                   {product.videos?.map((video, index) => (
                     <button
                       key={`video-${index}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 border-white/50 hover:border-white bg-black/50 flex items-center justify-center"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedVideoIndex(index);
+                        setSelectedImageIndex(0); // Reset to first image
+                      }}
+                      className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all bg-black/50 flex items-center justify-center ${
+                        selectedVideoIndex === index
+                          ? 'border-white ring-2 ring-white/50'
+                          : 'border-white/50 hover:border-white'
+                      }`}
                       data-testid={`video-thumbnail-${index}`}
                     >
                       <i className="fas fa-play text-white text-lg md:text-xl"></i>
@@ -193,7 +210,7 @@ export default function ProductDetail() {
             )}
             
             {/* Product info at bottom */}
-            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 md:p-8 lg:p-12 z-30">
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6 md:p-8 lg:p-12 z-50">
               <div className="max-w-md mx-auto md:max-w-2xl lg:max-w-4xl space-y-3 md:space-y-4">
                 <div>
                   <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2">{product.name}</h1>
@@ -276,8 +293,6 @@ export default function ProductDetail() {
               />
             </div>
           )}
-        </div>
-      </div>
     </div>
   );
 }

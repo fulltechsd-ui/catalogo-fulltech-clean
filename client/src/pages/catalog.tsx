@@ -212,7 +212,7 @@ export default function Catalog() {
   const filteredProducts = realProducts.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     // Handle category matching - product.category can be either slug, ID, or name
     const matchesCategory = selectedCategory === "all" || (() => {
       // Find the category that matches the product.category (could be ID, slug, or name)
@@ -221,14 +221,14 @@ export default function Catalog() {
         cat.slug === product.category ||
         cat.name.toLowerCase() === product.category.toLowerCase()
       );
-      
+
       // Match if product category matches selected category (by slug)
       return productCategoryData && productCategoryData.slug === selectedCategory;
     })();
-    
+
     const matchesOffers = showOnlyOffers ? product.onSale : true;
     const isInStock = product.inStock; // Solo mostrar productos disponibles
-    
+
     return matchesSearch && matchesCategory && matchesOffers && isInStock;
   });
 
@@ -263,10 +263,10 @@ export default function Catalog() {
           <TopBar />
           <WelcomeMessage />
           <UserActivityTracker />
-          
+
           <div id="hero-container" className="relative h-80 sm:h-96 lg:h-[500px] xl:h-[600px] bg-gray-300 mt-0 w-full">
             <HeroSlider />
-            
+
             <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-5 z-10 bg-black/10">
               <h2 className="text-3xl md:text-4xl xl:text-5xl font-bold mb-2 drop-shadow-lg">Tecnología de Vanguardia</h2>
               <p className="text-lg md:text-xl xl:text-2xl mb-4 drop-shadow-md max-w-md md:max-w-2xl">Descubre los últimos productos tecnológicos con la mejor calidad y precios</p>
@@ -305,7 +305,7 @@ export default function Catalog() {
                       <i className="fas fa-th-large"></i>
                       All
                     </button>
-                    
+
                     <button
                       onClick={() => setShowOnlyOffers(true)}
                       className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
@@ -392,12 +392,12 @@ export default function Catalog() {
                           <i className="fas fa-times text-gray-600"></i>
                         </button>
                       </div>
-                      
+
                       <div className="text-center space-y-4">
                         <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto">
                           <i className="fab fa-google text-white text-2xl"></i>
                         </div>
-                        
+
                         <div>
                           <h4 className="text-lg font-semibold text-gray-800 mb-2">
                             Registro Rápido y Seguro
@@ -405,7 +405,7 @@ export default function Catalog() {
                           <p className="text-sm text-gray-600 mb-4">
                             Con tu cuenta de Google obtienes automáticamente:
                           </p>
-                          
+
                           <div className="text-left space-y-2 mb-6">
                             <div className="flex items-center gap-2">
                               <i className="fas fa-check-circle text-green-500"></i>
@@ -425,7 +425,7 @@ export default function Catalog() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-3">
                           <button 
                             onClick={() => {
@@ -437,7 +437,7 @@ export default function Catalog() {
                             <i className="fab fa-google"></i>
                             Continuar con Google
                           </button>
-                          
+
                           <button 
                             onClick={() => setShowRegistrationForm(false)}
                             className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
@@ -445,7 +445,7 @@ export default function Catalog() {
                             Tal vez más tarde
                           </button>
                         </div>
-                        
+
                         <p className="text-xs text-gray-500">
                           Registro 100% seguro • No spam • Política de privacidad respetada
                         </p>
@@ -473,7 +473,7 @@ export default function Catalog() {
                         />
                       )}
                     </div>
-                    
+
                     {/* Raffle Content */}
                     <div className="flex-1">
                       <h3 className="text-lg font-bold text-orange-800 mb-2 flex items-center gap-2">
@@ -501,7 +501,7 @@ export default function Catalog() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Store Location & Social Media Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Store Location */}
@@ -521,7 +521,7 @@ export default function Catalog() {
                       Cómo Llegar
                     </a>
                   </div>
-                  
+
                   {/* Embedded Map */}
                   <div className="bg-white/50 rounded-lg p-2">
                     <iframe
@@ -537,7 +537,7 @@ export default function Catalog() {
                     ></iframe>
                   </div>
                 </div>
-                
+
                 {/* Social Media Section */}
                 <div className="text-center mt-4">
                   <p className="text-xs text-muted-foreground mb-2">Síguenos en redes sociales</p>
@@ -564,7 +564,7 @@ export default function Catalog() {
                 </div>
               </div>
             )}
-            
+
             {/* Collapsed Footer - Only show when NOT expanded */}
             {!isFooterExpanded && (
               <div 
@@ -616,7 +616,7 @@ export default function Catalog() {
               </div>
               </div>
             )}
-            
+
             {/* Collapse Button - Only show when expanded */}
             {isFooterExpanded && (
               <div className="absolute top-2 right-2">

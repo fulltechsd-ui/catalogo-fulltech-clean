@@ -9,7 +9,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, layout }: ProductCardProps) {
   const [, setLocation] = useLocation();
-  
+
   const formatPrice = (priceInCents: number) => {
     return `$${(priceInCents / 100).toFixed(0)}`;
   };
@@ -76,7 +76,7 @@ export function ProductCard({ product, layout }: ProductCardProps) {
           autoRotate={true}
           rotateInterval={30000}
         />
-        
+
         {/* Sale Badge - Cinta diagonal fina y elegante */}
         {product.onSale && (
           <div className="absolute top-0 left-0 w-16 h-16 overflow-hidden z-30 pointer-events-none">
@@ -85,7 +85,7 @@ export function ProductCard({ product, layout }: ProductCardProps) {
             </div>
           </div>
         )}
-        
+
         {/* Action buttons */}
         <div className="absolute top-2 right-2 flex gap-1">
           <button 
@@ -110,7 +110,7 @@ export function ProductCard({ product, layout }: ProductCardProps) {
             <i className="far fa-heart text-muted-foreground text-sm transition-colors"></i>
           </button>
         </div>
-        
+
         <div className="p-3 lg:p-4">
           <h3 className="font-semibold text-sm lg:text-base text-card-foreground mb-1">{product.name}</h3>
           <p className="text-xs lg:text-sm text-muted-foreground mb-2">{product.description}</p>
@@ -162,7 +162,7 @@ export function ProductCard({ product, layout }: ProductCardProps) {
           autoRotate={true}
           rotateInterval={30000}
         />
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-card-foreground mb-1">{product.name}</h3>
           <p className="text-sm text-muted-foreground mb-2">{product.description}</p>

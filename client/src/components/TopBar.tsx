@@ -4,300 +4,300 @@ import { useCustomPages } from "@/hooks/useCustomPages";
 import { useInstantNavigation } from "@/hooks/useInstantNavigation";
 import { useConfigLoader, getConfigValue } from "@/lib/config";
 import { Link } from "wouter";
-import type { CustomPage } from "@shared/schema";
-// Logo por defecto - emoji o texto
-const logoDefault = "data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234F46E5'/%3E%3Ctext x='20' y='28' text-anchor='middle' fill='white' font-family='sans-serif' font-size='16' font-weight='bold'%3EFT%3C/text%3E%3C/svg%3E";
+
+const logoDefault =
+  "data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='20' fill='%234F46E5'/%3E%3Ctext x='20' y='28' text-anchor='middle' fill='white' font-family='sans-serif' font-size='16' font-weight='bold'%3EFT%3C/text%3E%3C/svg%3E";
 
 export function TopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // ---- PWA install (Android/desktop) ----
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showInstallButton, setShowInstallButton] = useState(false);
-  const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const [canInstall, setCanInstall] = useState(false);
+  const [isAppInstalled, setIsAppInstalled] = useState<boolean>(() => {
+    return (
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      (window.navigator as any).standalone === true
+    );
+  });
+
+  // ---- iOS tip ----
+  const [showIosTip, setShowIosTip] = useState<boolean>(() => {
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    const inStandalone = (window.navigator as any).standalone === true;
+    const dismissed = localStorage.getItem("ios_install_tip_dismissed") === "1";
+    return isIOS && !inStandalone && !dismissed;
+  });
+  const closeIosTip = () => {
+    setShowIosTip(false);
+    localStorage.setItem("ios_install_tip_dismissed", "1");
+  };
+
   const { customer, isAuthenticated, logout } = useCustomer();
   const { groupedPages } = useCustomPages();
   const { goHome, goToCustomPage } = useInstantNavigation();
-  
-  // Cargar configuraciones del sitio
+
   useConfigLoader();
-  
-  // Obtener configuraciones con valores por defecto
   const logoUrl = getConfigValue("logo_url", logoDefault);
   const siteName = getConfigValue("site_name", "FULLTECH");
   const logoAlt = getConfigValue("logo_alt", "FULLTECH Logo");
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => setIsMenuOpen((v) => !v);
   const closeMenu = () => setIsMenuOpen(false);
 
+  // ---- PWA listeners ----
   useEffect(() => {
-    // Detectar si la app ya está instalada
-    const checkIfInstalled = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      const isIosStandalone = (window.navigator as any).standalone;
-      const appInstalled = isStandalone || isIosStandalone;
-      setIsAppInstalled(appInstalled);
-      
-      // Mostrar botón de instalar si no está instalada (para PWA)
-      if (!appInstalled) {
-        setShowInstallButton(true);
-      }
-    };
-
-    checkIfInstalled();
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
 
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Asegurar que el botón se muestre cuando el navegador lo permita
-      setShowInstallButton(true);
+      setCanInstall(true);
     };
 
-    // Evento cuando se instala la app
     const handleAppInstalled = () => {
       setIsAppInstalled(true);
-      setShowInstallButton(false);
+      setCanInstall(false);
       setDeferredPrompt(null);
+      setShowIosTip(false);
+      localStorage.setItem("ios_install_tip_dismissed", "1");
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    const mq = window.matchMedia?.("(display-mode: standalone)");
+    const onModeChange = () => {
+      if (mq?.matches) {
+        setIsAppInstalled(true);
+        setCanInstall(false);
+        setShowIosTip(false);
+      }
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+    mq?.addEventListener?.("change", onModeChange);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+      mq?.removeEventListener?.("change", onModeChange);
     };
   }, []);
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      // Si tenemos el prompt nativo, úsalo
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        setShowInstallButton(false);
-        setIsAppInstalled(true);
-      }
-      
-      setDeferredPrompt(null);
-    } else {
-      // Fallback: mostrar instrucciones para instalar manualmente
-      const userAgent = navigator.userAgent.toLowerCase();
-      let instructions = "";
-      
-      if (userAgent.includes('chrome') || userAgent.includes('edge')) {
-        instructions = "Para instalar: Ve al menú del navegador (⋮) → 'Instalar FULLTECH' o busca el ícono de instalación en la barra de direcciones.";
-      } else if (userAgent.includes('firefox')) {
-        instructions = "Para instalar: Ve al menú del navegador (☰) → 'Instalar' o busca el ícono de instalación en la barra de direcciones.";
-      } else if (userAgent.includes('safari')) {
-        instructions = "Para instalar en iOS: Toca el botón 'Compartir' (□↗) → 'Añadir a pantalla de inicio'.";
-      } else {
-        instructions = "Para instalar: Busca la opción 'Instalar' o 'Añadir a pantalla de inicio' en el menú de tu navegador.";
-      }
-      
-      alert(`¡Instala FULLTECH como app!\n\n${instructions}\n\nTendrás acceso rápido y una experiencia como app nativa.`);
+    if (!deferredPrompt) {
+      setShowIosTip(true); // sin prompt (iOS) → mostrar ayuda
+      return;
     }
+    deferredPrompt.prompt();
+    try {
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") setCanInstall(false);
+    } catch {}
+    setDeferredPrompt(null);
   };
 
   const handleShareClick = async () => {
+    const url = window.location.href;
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Catálogo FULLTECH',
-          text: '¡Descubre los mejores productos tech en FULLTECH! Ofertas increíbles y tecnología de vanguardia.',
-          url: window.location.href,
+          title: "Catálogo FULLTECH",
+          text: "¡Descubre los mejores productos tech en FULLTECH!",
+          url,
         });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      // Fallback para navegadores que no soportan Web Share API
-      const shareData = {
-        title: 'Catálogo FULLTECH',
-        text: '¡Descubre los mejores productos tech en FULLTECH!',
-        url: window.location.href,
-      };
-      
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
-        alert('¡Enlace copiado al portapapeles!');
-      } else {
-        // Último fallback
-        const textArea = document.createElement('textarea');
-        textArea.value = `${shareData.text} ${shareData.url}`;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('¡Enlace copiado al portapapeles!');
-      }
+        return;
+      } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("¡Enlace copiado al portapapeles!");
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      alert("¡Enlace copiado al portapapeles!");
     }
   };
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 safe-area-top">
-      <div className="bg-white/10 backdrop-blur-lg border-b border-white/20 shadow-lg px-4 py-3 flex items-center justify-between h-16 md:h-20 md:px-8">
-        <button 
+      {/* Fondo claro tipo vidrio para que el negro siempre contraste */}
+      <div className="bg-white/60 backdrop-blur-lg border-b border-white/70 shadow-sm px-4 py-3 flex items-center justify-between h-16 md:h-20 md:px-8">
+        <button
           onClick={goHome}
           className="flex items-center gap-3 hover:opacity-90 transition-opacity"
           data-testid="button-home-logo"
+          aria-label="Ir al inicio"
         >
-          <img 
-            src={logoUrl} 
-            alt={logoAlt} 
-            className="w-10 h-10 md:w-12 md:h-12 object-contain filter drop-shadow-md animate-spin-slow rounded-full"
+          <img
+            src={logoUrl}
+            alt={logoAlt}
+            className="w-10 h-10 md:w-12 md:h-12 object-contain rounded-full ring-2 ring-blue-500/20"
           />
-          <div>
-            <h1 className="text-white font-bold text-xl md:text-2xl tracking-wider drop-shadow-xl bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent filter brightness-150 contrast-125">{siteName}</h1>
+          <div className="text-left">
+            <h1 className="text-slate-900 font-extrabold tracking-tight text-xl md:text-2xl">
+              {siteName}
+            </h1>
             {isAuthenticated && customer && (
-              <p className="text-white/80 text-xs md:text-sm drop-shadow-sm">
-                Hola, {customer.name.split(' ')[0]} 👋
+              <p className="text-slate-700 text-xs md:text-sm">
+                Hola, <span className="font-semibold">{customer.name.split(" ")[0]}</span> 👋
               </p>
             )}
           </div>
         </button>
-        <div className="flex items-center gap-2 md:gap-4">
-          {/* Botón Compartir - siempre visible */}
-          <button 
+
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Compartir */}
+          <button
             onClick={handleShareClick}
-            className="icon-button bg-white/20 backdrop-blur-sm rounded-full p-2 md:p-3 hover:bg-white/30 transition-colors"
+            className="rounded-full p-2 md:p-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
             data-testid="button-share-app"
             title="Compartir App"
+            aria-label="Compartir App"
           >
-            <i className="text-white fas fa-share-alt text-sm md:text-base"></i>
+            <i className="fas fa-share-alt text-slate-900 text-sm md:text-base" />
           </button>
-          
-          {/* Botón Instalar - solo si no está instalada */}
-          {showInstallButton && !isAppInstalled && (
-            <button 
+
+          {/* Instalar (Android/Desktop con prompt) */}
+          {canInstall && !isAppInstalled && (
+            <button
               onClick={handleInstallClick}
-              className="icon-button bg-green-500/80 backdrop-blur-sm rounded-full p-2 md:p-3 hover:bg-green-600 transition-colors animate-pulse"
+              className="rounded-full p-2 md:p-3 bg-emerald-200 hover:bg-emerald-300 border border-emerald-300 transition-colors"
               data-testid="button-install-app"
               title="Instalar App"
+              aria-label="Instalar App"
             >
-              <i className="text-white fas fa-download text-sm md:text-base"></i>
+              <i className="fas fa-download text-slate-900 text-sm md:text-base" />
             </button>
           )}
-          
-          {isAuthenticated && customer && (
-            <div className="flex items-center gap-2">
-              <img 
-                src={customer.picture} 
-                alt={customer.name}
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-white/30"
-              />
-            </div>
-          )}
-          <button 
-            id="menu-toggle" 
-            className="icon-button bg-white/20 backdrop-blur-sm rounded-full p-2 md:p-3 hover:bg-white/30 transition-colors"
+
+          {/* Menú */}
+          <button
+            id="menu-toggle"
+            className="rounded-full p-2 md:p-3 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors"
             onClick={toggleMenu}
             data-testid="button-menu-toggle"
+            title="Menú"
+            aria-label="Abrir menú"
           >
-            <i className="text-white fas fa-bars text-sm md:text-base"></i>
+            <i className="fas fa-bars text-slate-900 text-sm md:text-base" />
           </button>
         </div>
       </div>
 
-      {/* Dropdown Menu */}
-      <div 
-        className={`absolute top-20 md:top-24 right-4 md:right-8 w-64 md:w-80 bg-white border border-border rounded-xl shadow-lg p-4 md:p-6 z-50 transition-all duration-200 ${
-          isMenuOpen 
-            ? 'opacity-100 visible translate-y-0' 
-            : 'opacity-0 invisible -translate-y-2'
+      {/* TIP iOS: guía de instalación */}
+      {showIosTip && !isAppInstalled && (
+        <div className="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm flex items-end md:items-center md:justify-center">
+          <div className="w-full md:max-w-md bg-white rounded-t-2xl md:rounded-2xl p-5 md:p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-slate-900 font-semibold">Añadir a pantalla de inicio</h3>
+              <button
+                onClick={closeIosTip}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center"
+                aria-label="Cerrar"
+              >
+                <i className="fas fa-times text-slate-800" />
+              </button>
+            </div>
+            <ol className="text-slate-800 space-y-2 text-sm leading-relaxed">
+              <li>1. Toca el botón <strong>Compartir</strong> (cuadro con flecha ↑) en la barra inferior.</li>
+              <li>2. Elige <strong>Añadir a pantalla de inicio</strong>.</li>
+              <li>3. Presiona <strong>Añadir</strong>.</li>
+            </ol>
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-xs text-slate-500">Tip: usa Safari para mejor soporte PWA.</div>
+              <button
+                onClick={closeIosTip}
+                className="px-3 py-2 rounded-lg bg-slate-900 text-white text-sm"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Menú desplegable */}
+      <div
+        className={`absolute top-20 md:top-24 right-4 md:right-8 w-64 md:w-80 bg-white border border-slate-200 rounded-xl shadow-lg p-4 md:p-6 z-50 transition-all duration-200 ${
+          isMenuOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2"
         }`}
         data-testid="dropdown-menu"
       >
         {isAuthenticated ? (
           <>
-            {/* Información del usuario */}
-            <div className="px-3 py-2 bg-muted/50 rounded-lg mb-3">
+            <div className="px-3 py-2 bg-slate-50 rounded-lg mb-3">
               <div className="flex items-center gap-3">
-                <img 
-                  src={customer?.picture} 
-                  alt={customer?.name}
-                  className="w-10 h-10 rounded-full"
-                />
+                <img src={customer?.picture} alt={customer?.name} className="w-10 h-10 rounded-full" />
                 <div>
-                  <p className="font-medium text-sm">{customer?.name}</p>
-                  <p className="text-xs text-muted-foreground">{customer?.email}</p>
-                  <p className="text-xs text-green-600 font-medium">
-                    Código: {customer?.referralCode}
-                  </p>
+                  <p className="font-medium text-sm text-slate-900">{customer?.name}</p>
+                  <p className="text-xs text-slate-600">{customer?.email}</p>
+                  <p className="text-xs text-emerald-600 font-medium">Código: {customer?.referralCode}</p>
                 </div>
               </div>
             </div>
 
-            {/* Opciones para usuarios logueados */}
-            <button 
-              className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors"
-              onClick={closeMenu}
-              data-testid="button-profile"
-            >
-              <i className="fas fa-user text-muted-foreground"></i>
-              <span>Mi Perfil</span>
+            <button className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-user text-slate-700" />
+              <span className="text-slate-900">Mi Perfil</span>
             </button>
-            <button 
-              className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors"
-              onClick={closeMenu}
-              data-testid="button-favorites"
-            >
-              <i className="fas fa-heart text-muted-foreground"></i>
-              <span>Favoritos</span>
+            <button className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-heart text-slate-700" />
+              <span className="text-slate-900">Favoritos</span>
             </button>
-            <button 
-              className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors"
-              onClick={closeMenu}
-              data-testid="button-cart"
-            >
-              <i className="fas fa-shopping-cart text-muted-foreground"></i>
-              <span>Carrito</span>
+            <button className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-shopping-cart text-slate-700" />
+              <span className="text-slate-900">Carrito</span>
             </button>
-            
-            <hr className="my-2 border-border" />
-            
-            {/* Páginas principales dinámicas */}
-            {groupedPages.main && groupedPages.main.map((page) => (
-              <button 
-                key={page.id} 
+
+            <hr className="my-2 border-slate-200" />
+
+            {groupedPages.main?.map((page) => (
+              <button
+                key={page.id}
                 onClick={() => {
                   closeMenu();
                   goToCustomPage(page.slug);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" 
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors"
               >
-                <i className="fas fa-file-alt text-muted-foreground"></i>
-                <span>{page.title}</span>
+                <i className="fas fa-file-alt text-slate-700" />
+                <span className="text-slate-900">{page.title}</span>
               </button>
             ))}
-            
-            {/* Páginas de soporte dinámicas */}
-            {groupedPages.support && groupedPages.support.map((page) => (
-              <button 
-                key={page.id} 
+
+            {groupedPages.support?.map((page) => (
+              <button
+                key={page.id}
                 onClick={() => {
                   closeMenu();
                   goToCustomPage(page.slug);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" 
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors"
               >
-                <i className="fas fa-headset text-muted-foreground"></i>
-                <span>{page.title}</span>
+                <i className="fas fa-headset text-slate-700" />
+                <span className="text-slate-900">{page.title}</span>
               </button>
             ))}
-            
-            {/* Páginas legales estáticas */}
-            <Link href="/garantia" className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" onClick={closeMenu}>
-              <i className="fas fa-shield-alt text-muted-foreground"></i>
-              <span>Garantía</span>
+
+            <Link href="/garantia" className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-shield-alt text-slate-700" />
+              <span className="text-slate-900">Garantía</span>
             </Link>
-            <Link href="/contacto" className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" onClick={closeMenu}>
-              <i className="fas fa-headset text-muted-foreground"></i>
-              <span>Contacto</span>
+            <Link href="/contacto" className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-headset text-slate-700" />
+              <span className="text-slate-900">Contacto</span>
             </Link>
-            
-            <hr className="my-2 border-border" />
-            
-            <button 
+
+            <hr className="my-2 border-slate-200" />
+
+            <button
               className="w-full flex items-center gap-3 p-3 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
               onClick={() => {
                 closeMenu();
@@ -305,77 +305,67 @@ export function TopBar() {
               }}
               data-testid="button-logout"
             >
-              <i className="fas fa-sign-out-alt text-red-600"></i>
-              <span className="font-medium">Cerrar Sesión</span>
+              <i className="fas fa-sign-out-alt" />
+              <span className="font-semibold">Cerrar Sesión</span>
             </button>
           </>
         ) : (
           <>
-            {/* Páginas principales dinámicas */}
-            {groupedPages.main && groupedPages.main.map((page) => (
-              <button 
-                key={page.id} 
+            {groupedPages.main?.map((page) => (
+              <button
+                key={page.id}
                 onClick={() => {
                   closeMenu();
                   goToCustomPage(page.slug);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" 
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors"
               >
-                <i className="fas fa-file-alt text-muted-foreground"></i>
-                <span>{page.title}</span>
+                <i className="fas fa-file-alt text-slate-700" />
+                <span className="text-slate-900">{page.title}</span>
               </button>
             ))}
-            
-            {/* Páginas de soporte dinámicas */}
-            {groupedPages.support && groupedPages.support.map((page) => (
-              <button 
-                key={page.id} 
+
+            {groupedPages.support?.map((page) => (
+              <button
+                key={page.id}
                 onClick={() => {
                   closeMenu();
                   goToCustomPage(page.slug);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" 
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors"
               >
-                <i className="fas fa-headset text-muted-foreground"></i>
-                <span>{page.title}</span>
+                <i className="fas fa-headset text-slate-700" />
+                <span className="text-slate-900">{page.title}</span>
               </button>
             ))}
-            
-            {/* Páginas legales estáticas */}
-            <Link href="/garantia" className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" onClick={closeMenu}>
-              <i className="fas fa-shield-alt text-muted-foreground"></i>
-              <span>Garantía</span>
+
+            <Link href="/garantia" className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-shield-alt text-slate-700" />
+              <span className="text-slate-900">Garantía</span>
             </Link>
-            <Link href="/contacto" className="w-full flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors" onClick={closeMenu}>
-              <i className="fas fa-headset text-muted-foreground"></i>
-              <span>Contacto</span>
+            <Link href="/contacto" className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors" onClick={closeMenu}>
+              <i className="fas fa-headset text-slate-700" />
+              <span className="text-slate-900">Contacto</span>
             </Link>
-            
-            <hr className="my-2 border-border" />
-            
-            {/* Login para usuarios no autenticados */}
-            <button 
-              className="w-full flex items-center gap-3 p-3 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
+
+            <hr className="my-2 border-slate-200" />
+
+            <button
+              className="w-full flex items-center gap-3 p-3 hover:bg-blue-50 text-blue-700 rounded-lg transition-colors"
               onClick={() => {
                 closeMenu();
-                window.location.href = '/login';
+                window.location.href = "/login";
               }}
               data-testid="button-login"
             >
-              <i className="fas fa-sign-in-alt text-blue-600"></i>
-              <span className="font-medium">Iniciar Sesión</span>
+              <i className="fas fa-sign-in-alt" />
+              <span className="font-semibold">Iniciar Sesión</span>
             </button>
           </>
         )}
       </div>
 
-      {/* Overlay to close menu */}
-      {isMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={closeMenu}
-        />
-      )}
+      {isMenuOpen && <div className="fixed inset-0 z-40" onClick={closeMenu} />}
     </header>
   );
 }

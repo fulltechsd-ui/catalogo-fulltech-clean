@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
+import { useEffect, useState } from "react";
+import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+
 import NotFound from "@/pages/not-found";
 import Catalog from "@/pages/catalog";
 import ProductDetail from "@/pages/ProductDetail";
@@ -20,34 +21,30 @@ import Contact from "@/pages/Contact";
 import CustomPage from "@/pages/CustomPage";
 import { Footer } from "@/components/Footer";
 
-function Router() {
-  const [currentHash, setCurrentHash] = useState(window.location.hash);
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
-  
+/** Sube al top cuando cambia la ruta */
+function ScrollToTop() {
+  const [location] = useLocation();
   useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentHash(window.location.hash);
-    };
+    const id = window.requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    return () => window.cancelAnimationFrame(id);
+  }, [location]);
+  return null;
+}
 
-    const handlePathChange = () => {
-      setCurrentPath(window.location.pathname);
-    };
+function Router() {
+  const [location] = useLocation();
+  const [hash, setHash] = useState(typeof window !== "undefined" ? window.location.hash : "");
 
-    window.addEventListener('hashchange', handleHashChange);
-    window.addEventListener('popstate', handlePathChange);
-    
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-      window.removeEventListener('popstate', handlePathChange);
-    };
+  // escuchar cambios de hash (para páginas custom)
+  useEffect(() => {
+    const handleHash = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", handleHash);
+    return () => window.removeEventListener("hashchange", handleHash);
   }, []);
 
-  // Check for hash-based custom page routing
-  const isCustomPage = currentHash && currentHash.startsWith('#page=');
-  
-  // Check if current page should show footer (only home page)
-  const shouldShowFooter = currentPath === '/' && !isCustomPage;
-  
+  const isCustomPage = hash?.startsWith("#page=");
+  const shouldShowFooter = location === "/" && !isCustomPage;
+
   if (isCustomPage) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -60,7 +57,8 @@ function Router() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className={`flex-1 ${shouldShowFooter ? 'pb-16' : ''}`}>
+      <div className={`flex-1 ${shouldShowFooter ? "pb-16" : ""}`}>
+        <ScrollToTop />
         <Switch>
           <Route path="/" component={Catalog} />
           <Route path="/product/:id" component={ProductDetail} />
@@ -78,20 +76,19 @@ function Router() {
           <Route component={NotFound} />
         </Switch>
       </div>
+
       {shouldShowFooter && <Footer />}
     </div>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
+      <TooltipProvider delayDuration={150}>
         <Toaster />
         <Router />
       </TooltipProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;
